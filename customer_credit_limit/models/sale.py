@@ -77,6 +77,9 @@ class Sale(models.Model):
 
     def action_confirm(self):
         for record in self:
+            if record.partner_id.cr_expiry_date and record.partner_id.cr_expiry_date < datetime.now().date():
+                raise Warning(_("CR Expired for customer, You can not confirm sale order for customer : %s." % (record.partner_id.name)))
+
             if record.state in ['draft', 'sent']:
                 credit_limit_exceeded, credit_duration_exceeded = record.check_credit_limit_exceeded()
                 if credit_limit_exceeded or credit_duration_exceeded:
