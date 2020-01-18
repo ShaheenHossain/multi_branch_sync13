@@ -8,8 +8,8 @@ class ResPartner(models.Model):
     _inherit = "res.partner"
 
     credit_limit = fields.Float("Credit Limit", help="Credit Limit to manage customer outstanding debts.")
-    name_on_board = fields.Char("Name On Board", required=True, help="Name on board for customer.")
-    cr_no = fields.Char("CR", required=True, help="CR Number")
+    name_on_board = fields.Char("Name On Board", help="Name on board for customer.")
+    cr_no = fields.Char("CR", help="CR Number")
     cr_issue_date = fields.Date("Issue Date", help="CR Issue Date")
     cr_expiry_date = fields.Date("Expiry Date", help="CR Expiry Date")
     license_no = fields.Char("License", help="License Number")

@@ -13,11 +13,11 @@
                 <page name="other_information" string="Other Information">
                     <div class="oe_title">
                         <label for="name_on_board"/>
-                        <field name="name_on_board"/>
+                        <field name="name_on_board" required="1"/>
                     </div>
                     <group name="other_main">
                         <group name="other_cr" string="CR">
-                            <field name="cr_no"/>
+                            <field name="cr_no" required="1"/>
                             <field name="cr_issue_date"/>
                             <field name="cr_expiry_date"/>
                         </group>
