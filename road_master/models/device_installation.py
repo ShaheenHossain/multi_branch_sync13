@@ -380,8 +380,8 @@ class DeviceInstallation(models.Model):
             for line in device_installation.device_installation_line_ids:
                 procurement_group = self.create_procurement_group()
                 picking_data = stock_picking_obj.default_get(picking_fields)
-                internal_picking_type = stock_picking_type_obj.search([("code", '=', "internal"), ("warehouse_id", "=", device_installation.sale_order_id.warehouse_id.id)])
-                out_picking_type = stock_picking_type_obj.search([("code", '=', "outgoing"), ("warehouse_id", "=", device_installation.sale_order_id.warehouse_id.id)])
+                internal_picking_type = device_installation.sale_order_id.warehouse_id.int_type_id
+                out_picking_type = device_installation.sale_order_id.warehouse_id.out_type_id
 
                 tmp_stock_move = stock_move_obj.new({
                     "product_id": line.product_id.id,
