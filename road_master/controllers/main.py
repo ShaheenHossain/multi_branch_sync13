@@ -31,7 +31,7 @@ class PortalAccount(CustomerPortal):
         installation = request.env['device.installation'].sudo()
         redirect = ("/my/installation")
         try:
-            insllation_sudo = self._document_check_access('device.installation', installation_id, access_token=access_token)
+            insllation_sudo = installation_id and installation.browse(installation_id) or False
             values = insllation_sudo
         except Exception as e:
             return request.redirect("%s?error_msg=%s" % (redirect, (e)))
