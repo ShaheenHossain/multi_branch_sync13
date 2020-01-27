@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_subscription_rmts_inherit" model="ir.ui.view">
+        <field name="name">sales.subscription.rmts.inherit</field>
+        <field name="model">sale.subscription</field>
+        <field name="priority" eval="80"/>
+        <field name="inherit_id" ref="sale_subscription.sale_subscription_view_form"/>
+        <field name="arch" type="xml">
+            <field name="code" position="after">
+                <field name="renew_type"/>
+            </field>
+        </field>
+    </record>
+</odoo>

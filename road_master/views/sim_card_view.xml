@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sim_card_tree_view" model="ir.ui.view">
+        <field name="name">sim.card.tree.view</field>
+        <field name="model">sim.card</field>
+        <field name="arch" type="xml">
+            <tree string="Sim Cards">
+                <field name="name"/>
+                <field name="serial_no"/>
+                <field name="partner_id"/>
+                <field name="mobile_no"/>
+                <field name="associated_plate_no"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="sim_card_form_view" model="ir.ui.view">
+        <field name="name">sim.card.form.view</field>
+        <field name="model">sim.card</field>
+        <field name="arch" type="xml">
+            <form string="Sim Card">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h2>
+                            <field name="name"/>
+                        </h2>
+                        <label for="branch_id"/>
+                        <h4>
+                            <field name="branch_id"/>
+                        </h4>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="serial_no"/>
+                            <field name="mobile_no"/>
+                            <field name="associated_plate_no"/>
+                        </group>
+                        <group>
+                            <field name="activation_date"/>
+                            <field name="partner_id"/>
+                            <field name="associated_contract_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sim_card_search_view" model="ir.ui.view">
+        <field name="name">sim.card.search.view</field>
+        <field name="model">sim.card</field>
+        <field name="arch" type="xml">
+            <search string="Sim Cards">
+                <field name="name" string="SIM" filter_domain="['|', ('name', 'ilike', self),('serial_no', 'ilike', self)]"/>
+                <separator/>
+                <filter string="Active" name="filter_is_active" domain="[('state','=','active')]"/>
+                <filter string="Inactive" name="filter_is_inactive" domain="[('state', '=', 'inactive')]"/>
+                <separator/>
+                <group expand="1" string="Group By">
+                    <filter string="Provider" name="group_by_partner_id" context="{'group_by':'partner_id'}"/>
+                    <filter string="Branch" name="group_by_branch_id" context="{'group_by':'branch_id'}"/>
+                    <filter string="Contract" name="group_by_associated_contract_id" context="{'group_by':'associated_contract_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="sim_card_action" model="ir.actions.act_window">
+        <field name="name">Sim Cards</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sim.card</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem action="sim_card_action" id="menu_sim_card" groups="road_master.group_rmts_technician"
+        parent="sale.product_menu_catalog" string="Sim Cards" sequence="3"/>
+
+</odoo>

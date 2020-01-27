@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="portal_layout" inherit_id="portal.portal_breadcrumbs" priority="35">
+            <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+                <li t-if="page_name == 'Devise Installation' or installation" t-attf-class="breadcrumb-item #{'active ' if not installation else ''}">
+                    <a t-if="installation" t-attf-href="/my/installation?{{ keep_query() }}">Installations</a>
+                    <t t-else="">Installations</t>
+                </li>
+                <li t-if="installation" class="breadcrumb-item active">
+                    <!-- <t t-esc="installation.name"/> -->
+                </li>
+            </xpath>
+        </template>
+
+        <template id="portal_my_home_installation" inherit_id="portal.portal_my_home" priority="60">
+            <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+                <t t-if="installation_count" t-call="portal.portal_docs_entry">
+                    <t t-set="title">Installations</t>
+                    <t t-set="url" t-value="'/my/installation'"/>
+                    <t t-set="count" t-value="installation_count"/>
+                </t>
+            </xpath>
+        </template>
+        <template id="portal_my_installations" name="My Installation">
+            <t t-call="portal.portal_layout">
+                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+                <t t-call="portal.portal_searchbar">
+                    <t t-set="title">Installation</t>
+                </t>
+                <t t-if="not grouped_installation">
+                    <p>There are currently no Installation.</p>
+                </t>
+                <t t-if="grouped_installation" t-call="portal.portal_table">
+                    <thead>
+                        <tr class="active">
+                            <th>
+                                <span class='d-none d-md-inline'>Name</span>
+                            </th>
+                            <th class="text-right">Branch</th>
+                              <th class="text-right">Sale Order</th>
+                            <th class="text-right">Installation Schedule Date</th>
+                            <th class="text-right">Installation Done Date</th>
+                        </tr>
+                    </thead>
+                    <t t-foreach="grouped_installation" t-as="installation">
+                        <tr>
+                            <td><a t-attf-href="/my/installation/#{installation.id}"><t t-esc="installation.name"/></a></td>
+                            <td class="text-right"><span t-field="installation.branch_id"/></td>
+                            <td class="text-right"><span t-field="installation.sale_order_id"/></td>
+                            <td class="text-right"><span t-field="installation.installation_schedule_date"/></td>
+                            <td class="text-right">
+                                <span t-field="installation.installation_done_date" t-options="{'time_only': True}"/>
+                            </td>
+                        </tr>
+                    </t>
+                </t>
+                <div t-if="pager" class="o_portal_pager text-center">
+                    <t t-call="portal.pager"/>
+                </div>
+            </t>
+    </template>
+
+    <template id="installation_portal_content" name="Installation Portal Content" inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <div class="row mt16 o_portal_sale_sidebar">
+                <!-- Sidebar -->
+                <t t-call="portal.portal_record_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+
+                    <t t-set="title">
+                        <h2 class="mb-0"><b t-field="post.name"/> </h2>
+                    </t>
+                    <t t-if="post.is_sign == False" t-set="entries">
+                        <ul class="list-group list-group-flush flex-wrap flex-row flex-lg-column">
+                            <li class="list-group-item flex-grow-1">
+                                <a role="button" class="btn btn-primary btn-block mb8" data-toggle="modal" data-target="#modalaccept" href="#">
+                                    <i class="fa fa-check"/><t> Accept &amp; Sign</t>
+                                </a>
+                            </li>
+                        </ul>
+                    </t>
+                </t>
+
+                <!-- Page content -->
+                <div id="quote_content" class="col-12 col-lg justify-content-end">
+
+                    <!-- modal relative to the actions sign-->
+                    <div role="dialog" class="modal fade" id="modalaccept">
+                        <div class="modal-dialog">
+                            <form id="accept" method="POST" class="modal-content" action="/my/signature">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <header class="modal-header">
+                                    <h4 class="modal-title">Sign Installation</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">&amp;times;</button>
+                                </header>
+                                <main class="modal-body" id="sign-dialog">
+                                    <t t-call="portal.signature_form">
+                                         <t t-set="call_url" t-value="'/my/signature/?id=#{post.id}'"/>
+                                         <t t-set="call_url" t-value="post.get_portal_url()"/>
+                                    </t>
+                                </main>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- main content -->
+                    <div t-attf-class="card pb-5">
+                        <div id="introduction" t-attf-class="pb-2 pt-3 card-header bg-white">
+                          <h2 t-if="post.name" class="my-0">
+                                <em t-esc="post.name"/>
+                          </h2>
+                        </div>
+                        <div class="row mt32">
+                            <div class="col-md-12 pl-4 mb-3 col-6">
+                              <t>
+                                <strong>Branch:</strong>
+                                <span t-field="post.sale_order_id"/>
+                              </t>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 pl-4 mb-3 col-6">
+                                <strong>Sale Order:</strong> <span t-field="post.sale_order_id"/>
+                            </div>
+                        </div>
+                        <div class="row mt32">
+                            <div class=" col-md-6 pl-4 mb-3 col-6">
+                                <strong>Installation Schedule Date:</strong> <span t-field="post.installation_schedule_date" t-options='{"widget": "date"}'/>
+                            </div>
+                            <div class=" col-md-6 pl-4 mb-3 col-6">
+                                <strong>Installation Done Date:</strong> <span t-field="post.installation_done_date" t-options='{"widget": "date"}'/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <section id="details" style="page-break-inside: auto;" class="mt32 pl-4 pr-4 col-md-12">
+                                <h3 id="details">Installation Lines</h3>
+                                <table class="table table-sm" id="sales_order_table">
+                                    <thead class="bg-100">
+                                        <tr>
+                                            <th class="text-left">Vehicle Plate No.</th>
+                                            <th class="text-right">Product</th>
+                                            <th class="text-right d-none d-md-table-cell">Quantity</th>
+                                            <th class="text-right d-md-table-cell">
+                                                <span>Unit Price</span>
+                                            </th>
+                                            <th class="text-right d-none d-md-table-cell"><span>Sub Total</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="sale_tbody">
+                                        <t t-foreach="post.device_installation_line_ids" t-as="installation">
+                                            <tr>
+                                                <td><t t-esc="installation.vehicle_plate_no"/></td>
+                                                <td class="text-right"><span t-field="installation.product_id"/></td>
+                                                <td class="text-right"><span t-field="installation.quantity"/></td>
+                                                <td class="text-right"><span t-field="installation.unit_price"/></td>
+                                                <td class="text-right"><span t-field="installation.sub_total"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+    </data>
+</odoo>

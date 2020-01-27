@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+            id="action_report_device_installation"
+            string="Device Installation"
+            model="device.installation"
+            report_type="qweb-pdf"
+            file="road_master.report_device_installation"
+            name="road_master.report_device_installation"
+            print_report_name="'Device Installation Schedule - %s' % (object.name)"
+        />
+    </data>
+</odoo>

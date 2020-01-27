@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hardware_type_tree_view" model="ir.ui.view">
+        <field name="name">hardware.type.tree.view</field>
+        <field name="model">hardware.type</field>
+        <field name="arch" type="xml">
+            <tree string="Hardware Types" editable="top">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="hardware_type_form_view" model="ir.ui.view">
+        <field name="name">hardware.type.form.view</field>
+        <field name="model">hardware.type</field>
+        <field name="arch" type="xml">
+            <form string="Hardware Type">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h2>
+                            <field name="name"/>
+                        </h2>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="hardware_type_search_view" model="ir.ui.view">
+        <field name="name">hardware.type.search.view</field>
+        <field name="model">hardware.type</field>
+        <field name="arch" type="xml">
+            <search string="Hardware Types">
+                <field name="name" string="SIM" filter_domain="['|', ('name', 'ilike', self),('serial_no', 'ilike', self)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="hardware_type_action" model="ir.actions.act_window">
+        <field name="name">Hardware Types</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hardware.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem action="hardware_type_action" id="menu_hardware_type" groups="road_master.group_rmts_technician"
+        parent="sale.menu_sale_config" string="Hardware Types" sequence="11"/>
+
+</odoo>

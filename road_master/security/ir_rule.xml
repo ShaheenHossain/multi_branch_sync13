@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Multi - Branch Rules -->
+    <record model="ir.rule" id="device_installation_branch_rule_user">
+        <field name="name">Device Installations : Multi Branch</field>
+        <field name="model_id" ref="road_master.model_device_installation"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|', ('branch_id', '=', False), ('branch_id', 'in', user.branch_ids.ids)]</field>
+    </record>
+
+    <record model="ir.rule" id="sim_cardbranch_rule_user">
+        <field name="name">Sim Card : Multi Branch</field>
+        <field name="model_id" ref="road_master.model_sim_card"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|', ('branch_id', '=', False), ('branch_id', 'in', user.branch_ids.ids)]</field>
+    </record>
+</odoo>

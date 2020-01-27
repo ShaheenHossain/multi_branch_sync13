@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_rmts_device_inherit_form" model="ir.ui.view">
+        <field name="name">product.rmts.device.inherit.rmts</field>
+        <field name="model">product.template</field>
+        <field name="priority" eval="79"/>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']" position="inside">
+                <div>
+                    <field name="is_rmts_device"/>
+                    <label for="is_rmts_device"/>
+                </div>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page name="rmts_device_info" string="RMTS Device Info." attrs="{'invisible': [('is_rmts_device', '!=', True)]}">
+                    <group name="rmts_device_info_main" string="RMTS Device Info.">
+                        <group name="rmts_device_info_1" string="General Information">
+                            <field name="internal_battery"/>
+                            <field name="digital_input"/>
+                            <field name="voice_monitoring"/>
+                            <field name="digital_output"/>
+                            <field name="analog_input"/>
+                            <field name="wire"/>
+                            <field name="memory_card_slot"/>
+                        </group>
+                        <group name="rmts_device_info_2" string="Device And Network">
+                            <field name="item_code" attrs="{'required': [('is_rmts_device', '=', True)]}"/>
+                            <field name="hardware_type_id"/>
+                            <field name="gsm_type"/>
+                            <field name="network_type"/>
+                            <field name="gps"/>
+                            <field name="operating_temperature" attrs="{'required': [('is_rmts_device', '=', True)]}"/>
+                        </group>
+                        <group name="rmts_device_info_3" string="Dimensions">
+                            <field name="device_uom_id" groups="uom.group_uom" domain="[('category_id.measure_type', '=', 'length')]"/>
+                            <field name="device_length"/>
+                            <field name="device_width"/>
+                            <field name="device_height"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="device_images" string="Device Images">
+                            <group name="device_images" string="Device Images">
+                                <field name="product_image_ids" nolabel="1">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="image"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <field name="name"/>
+                                            <field name="image"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </group>
+                        </page>
+                        <page name="device_description" string="Device Description">
+                            <group name="device_description" string="Device Description">
+                                <field name="device_description" nolabel="1"/>
+                            </group>
+                        </page>
+                        <page name="device_remarks" string="Remarks">
+                            <group name="device_remarks" string="Remarks">
+                                <field name="device_remarks" nolabel="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

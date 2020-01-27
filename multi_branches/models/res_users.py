@@ -18,3 +18,14 @@ class Users(models.Model):
         else:
             self.branch_ids = False
             return {'domain': {'branch_ids': []}}
+
+    @api.model
+    def create(self, vals):
+        res = super(Users, self).create(vals)
+        res.clear_caches()
+        return res
+
+    def write(self, vals):
+        res = super(Users, self).write(vals)
+        self.clear_caches()
+        return res

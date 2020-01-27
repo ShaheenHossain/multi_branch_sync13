@@ -40,13 +40,19 @@ class AccountInvoice(models.Model):
             default_values.update({
                 'branch_id': move.branch_id.id,
             })
-        return super()._reverse_moves(default_values_list=default_values_list, cancel=cancel)
+        return super(AccountInvoice, self)._reverse_moves(default_values_list=default_values_list, cancel=cancel)
 
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
-    branch_id = fields.Many2one("res.branch", string='Branch', related='move_id.branch_id', store=True)
+    def _default_branch_id(self):
+        branch_id = self.env.user.branch_id.id
+        if self._context.get('branch_id'):
+            branch_id = self._context.get('branch_id')
+        return branch_id
+
+    branch_id = fields.Many2one("res.branch", string='Branch', default=_default_branch_id)
 
 
 class AccountPayments(models.Model):

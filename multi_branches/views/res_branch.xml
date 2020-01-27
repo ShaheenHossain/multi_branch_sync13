@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <tree string="Branch">
                 <field name="sequence" widget="handle"/>
-                <field name ='name'/>
+                <field name='name'/>
                 <field name='company_id'/>
                 <field name='partner_id'/>
             </tree>
