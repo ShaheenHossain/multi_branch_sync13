@@ -26,7 +26,7 @@ class PortalAccount(CustomerPortal):
         }
         return self._get_page_view_values(installation, access_token, values, False, False, **kwargs)
 
-    @http.route(['/my/installation/<int:installation_id>'], type='http', auth="user", website=True)
+    @http.route(['/my/installation/<int:installation_id>'], type='http', auth="public", website=True)
     def portal_my_installation(self, installation_id=None, access_token=None, report_type=None, download=True, **kw):
         installation = request.env['device.installation'].sudo()
         redirect = ("/my/installation")
@@ -38,7 +38,7 @@ class PortalAccount(CustomerPortal):
         post = values
         return request.render("road_master.installation_portal_content", {'post': post})
 
-    @http.route(['/my/installation', '/my/installation/page/<int:page>'], type='http', auth="user", website=True)
+    @http.route(['/my/installation', '/my/installation/page/<int:page>'], type='http', auth="public", website=True)
     def portal_my_installation_details(self, page=1, search=None, **kw):
         installation_sudo = request.env['device.installation'].sudo()
         domain = []
