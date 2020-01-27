@@ -59,7 +59,8 @@ class PortalAccount(CustomerPortal):
     @http.route(['/my/signature/<int:inslattion_id>'], type='json', auth="public", website=True)
     def save_installation_signature(self, inslattion_id=None, **kw):
         try:
-            installation_sudo = self._document_check_access('device.installation', inslattion_id, access_token=False)
+            installation = request.env['device.installation'].sudo()
+            installation_sudo = inslattion_id and installation.browse(inslattion_id) or False
             attachment_value = {
                 'name': 'Installment Signature',
                 'datas': kw.get('signature'),

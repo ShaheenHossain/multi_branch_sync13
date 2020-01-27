@@ -99,6 +99,7 @@
                                     <t t-call="portal.signature_form">
                                          <t t-set="call_url" t-value="'/my/signature/?id=#{post.id}'"/>
                                          <t t-set="call_url" t-value="post.get_portal_url()"/>
+                                         <t t-set="default_name" t-value="post.partner_id.name"/>
                                     </t>
                                 </main>
                             </form>
