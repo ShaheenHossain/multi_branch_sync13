@@ -343,10 +343,7 @@ class DeviceInstallation(models.Model):
             })
         new_subscription = sale_subscription_obj.create(subscription_vals)
         self.device_installation_line_ids.write({"subscription_id": new_subscription.id if new_subscription else False})
-        if new_subscription and new_subscription.template_id.payment_mode in ['validate_send_payment', 'success_payment']:
-            new_subscription.recurring_invoice(automatic=True)
-        else:
-            new_subscription.recurring_invoice()
+        new_subscription.recurring_invoice()
         all_subscriptions = self.sale_order_id.device_installation_ids.mapped("device_installation_line_ids").mapped("subscription_id").filtered(lambda sub: sub.renew_type == 'based_on_last_plate_expiry_date')
         if all_subscriptions:
             last_plate_recurring_nextdate = max(all_subscriptions.mapped('recurring_next_date'))
