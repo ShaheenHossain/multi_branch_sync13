@@ -10,7 +10,7 @@
     'category': 'Sales/Accounting',
     'author': 'Synconics Technologies Pvt. Ltd.',
     'website': 'www.synconics.com',
-    'depends': ["multi_branches", "sale_subscription", 'website', 'mail'],
+    'depends': ["multi_branches", "sale_subscription", 'mail', 'portal'],
     'data': [
         "data/ir_sequence_data.xml",
         "data/email_data.xml",
