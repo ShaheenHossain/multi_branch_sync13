@@ -42,6 +42,21 @@ class AccountInvoice(models.Model):
             })
         return super(AccountInvoice, self)._reverse_moves(default_values_list=default_values_list, cancel=cancel)
 
+    def _get_sequence(self):
+        ''' Return the sequence to be used during the post of the current move.
+        :return: An ir.sequence record or False.
+        '''
+        self.ensure_one()
+        if self.branch_id:
+            if self.branch_id.invoice_sequence_id and self.type in ('out_invoice', 'out_receipt'):
+                return self.branch_id.invoice_sequence_id
+            if self.branch_id.bill_sequence_id and self.type in ('in_invoice', 'in_receipt'):
+                return self.branch_id.bill_sequence_id
+            if self.branch_id.invoice_refund_sequence_id and self.type in ('out_refund'):
+                return self.branch_id.invoice_refund_sequence_id
+            if self.branch_id.bill_refund_sequence_id and self.type in ('in_refund'):
+                return self.branch_id.bill_refund_sequence_id
+        return super(AccountInvoice, self)._get_sequence()
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"

@@ -35,3 +35,14 @@ class SaleOrder(models.Model):
         invoice_vals = super(SaleOrder, self)._prepare_invoice()
         invoice_vals.update({'branch_id': self.branch_id.id})
         return invoice_vals
+
+    @api.model
+    def create(self, vals):
+        if vals.get('branch_id'):
+            branch_id = self.env['res.branch'].browse(vals['branch_id'])
+            seq_date = None
+            if 'date_order' in vals:
+                seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
+            if branch_id.sale_sequence_id:
+                vals['name'] = branch_id.sale_sequence_id.next_by_id(sequence_date=seq_date) or _('New')
+        return super(SaleOrder, self).create(vals)

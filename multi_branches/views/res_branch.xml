@@ -52,6 +52,19 @@
                             <group name="social_media"/>
                         </group>
                     </page>
+                    <page string="Sequence">
+                        <group>
+                            <group>
+                                <field name="sale_sequence_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]"/>
+                                <field name="invoice_sequence_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]"/>
+                                <field name="invoice_refund_sequence_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]"/>
+                            </group>
+                            <group>
+                                <field name="bill_sequence_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]"/>
+                                <field name="bill_refund_sequence_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]"/>
+                            </group>
+                        </group>
+                    </page>
                 </notebook>
                 </sheet>
             </form>
