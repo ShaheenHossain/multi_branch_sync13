@@ -89,7 +89,7 @@
         <field name="name">Installation In Progress</field>
         <field name="sequence">1</field>
         <field name="team_ids" eval="[(4, ref('helpdesk_team_installation'))]"/>
-        <field name="is_close" eval="True"/>
+        <field name="is_close" eval="False"/>
     </record>
 
     <record id="stage_done" model="helpdesk.stage">
