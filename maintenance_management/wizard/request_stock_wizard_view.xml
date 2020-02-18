@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Request Stock Wizard Form -->
+    <record id="request_stock_wizard_form" model="ir.ui.view">
+        <field name="name">request.stock.wizard.form</field>
+        <field name="model">request.stock.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Request Stock">
+                <group string="Request Stock From Another Warehouse">
+                    <field name="request_stock_lines" nolabel="1">
+                        <tree editable="top" create="0" delete="0">
+                            <field name="request" nolabel="1"/>
+                            <field name="product_id"/>
+                            <field name="warehouse_id"/>
+                            <field name="quantity"/>
+                            <field name="request_qty" required="1"/>
+                            <field name="picking_id" invisible="1"/>
+                        </tree>
+                        <form>
+                            <sheet>
+                                <group string="Request Stock Line">
+                                    <field name="request"/>
+                                    <field name="product_id"/>
+                                    <field name="warehouse_id"/>
+                                    <field name="quantity"/>
+                                    <field name="request_qty" required="1"/>
+                                    <field name="picking_id" invisible="1"/>
+                                    <field name="request_stock_wizard_id" invisible="1"/>
+                                </group>
+                            </sheet>
+                        </form>
+                    </field>
+                </group>
+                <footer>
+                    <button name="create_request" string="Create Request" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action Request Stock -->
+    <record id="action_request_stock_wizard" model="ir.actions.act_window">
+        <field name="name">Request Stock Wizard</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">request.stock.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="request_stock_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

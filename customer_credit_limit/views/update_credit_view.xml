@@ -116,5 +116,5 @@
               name="Update Customer Credit Limit"
               action="action_update_credit"
               groups="sales_team.group_sale_salesman,account.group_account_manager"
-              sequence="5"/>
+              sequence="6"/>
 </odoo>

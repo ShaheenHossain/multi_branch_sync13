@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <template id="report_stamp">
+        <img t-if="company.company_stamp" t-att-src="image_data_uri(company.company_stamp)" style="max-height: 45px;" alt="Stamp"/>
+    </template>
+
+    <template id="report_sign">
+        <img t-if="user.user_signature" t-att-src="image_data_uri(user.user_signature)" style="max-height: 45px;" alt="Sign"/>
+    </template>
+
+    <template id="external_layout_standard_inherit" inherit_id="web.external_layout_standard">
+        <!-- footer -->
+        <li t-if="company.phone" position="before">
+            <t t-call="reports_stamp_sign.report_stamp"/>
+        </li>
+        <li t-if="company.vat" position="after">
+            <t t-call="reports_stamp_sign.report_sign"/>
+        </li>
+    </template>
+</odoo>

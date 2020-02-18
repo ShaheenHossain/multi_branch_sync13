@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="stock_picking_maintenance_ext" model="ir.ui.view">
+        <field name="name">stock.picking.maintenance.ext</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <button name="button_scrap" position="after">
+                <button name="%(action_request_stock_wizard)d" string="Request From Another Warehouse" type="action" class="oe_highlight" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': [('show_check_availability', '=', False)]}"/>
+            </button>
+
+            <div name="button_box" position="inside">
+                <button name="action_request_transfer" class="oe_stat_button" icon="fa-truck" type="object" attrs="{'invisible': [('transfer_request_count', '&lt;=', 0)]}">
+                    <field name="transfer_request_count" widget="statinfo" string="Requests"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+</odoo>

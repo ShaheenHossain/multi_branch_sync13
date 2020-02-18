@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Warranty Sequence -->
+        <record id="sequence_warranty" model="ir.sequence">
+            <field name="name">Warranty#</field>
+            <field name="code">warranty.detail</field>
+            <field name="prefix">Warranty/</field>
+            <field name="padding">6</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <!-- Cron for check warranty -->
+        <record model="ir.cron" id="warranty_expiry_cron">
+            <field name="name">Check Warranty</field>
+            <field eval="True" name="active"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+            <field name="model_id" ref="sales_warranty.model_warranty_detail"/>
+            <field name="state">code</field>
+            <field name="code">model.scheduler_check_warranty()</field>
+        </record>
+
+        <!-- warranty running mail template -->
+        <record id="warranty_running_email" model="mail.template">
+            <field name="name">Warranty Running</field>
+            <field name="model_id" ref="sales_warranty.model_warranty_detail"/>
+            <field name="email_from"><![CDATA[${object.company_id.name} <${(object.company_id.email or user.email)|safe}>]]></field>
+            <field name="email_to">${(object.partner_id and object.partner_email)|safe}</field>
+            <field name="subject"><![CDATA[${object.warranty_no} warranty is running]]></field>
+            <field name="body_html"><![CDATA[
+<p>Dear ${object.partner_id.name or 'Madam, Sir'},</p>
+<p>We are informing that your warranty ${object.warranty_no} is running.</p>
+<p>${object.product_id.name} product wararnty duration is ${object.start_date} to ${object.end_date}.</p>
+<p>Thank you,</p>
+% if object.company_id.name and object.company_id.email:
+    ${object.company_id.name | safe}
+% endif
+]]>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+
+        <!-- warranty expiration mail template -->
+        <record id="warranty_expiration_email" model="mail.template">
+            <field name="name">Warranty Expiration Notification</field>
+            <field name="model_id" ref="sales_warranty.model_warranty_detail"/>
+            <field name="email_from"><![CDATA[${object.company_id.name} <${(object.company_id.email or user.email)|safe}>]]></field>
+            <field name="email_to">${(object.partner_id and object.partner_email)|safe}</field>
+            <field name="subject"><![CDATA[${object.warranty_no} warranty expire Notification]]></field>
+            <field name="body_html"><![CDATA[
+<p>Dear ${object.partner_id.name or 'Madam, Sir'},</p>
+<p>We are informing that your warranty ${object.warranty_no} is near to expired please renew as soon as possible.</p>
+<p>${object.product_id.name} product warranty end date is ${object.end_date}.</p>
+<p>Thank you,</p>
+% if object.company_id.name and object.company_id.email:
+    ${object.company_id.name | safe}
+% endif
+]]>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+
+        <!-- warranty expiration mail template -->
+        <record id="warranty_expire_email" model="mail.template">
+            <field name="name">Warranty Expire</field>
+            <field name="model_id" ref="sales_warranty.model_warranty_detail"/>
+            <field name="email_from"><![CDATA[${object.company_id.name} <${(object.company_id.email or user.email)|safe}>]]></field>
+            <field name="email_to">${(object.partner_id and object.partner_email)|safe}</field>
+            <field name="subject"><![CDATA[${object.warranty_no} warranty Expired]]></field>
+            <field name="body_html"><![CDATA[
+<p>Dear ${object.partner_id.name or 'Madam, Sir'},</p>
+<p>We are informing that your warranty ${object.warranty_no} is expired.</p>
+<p>Thank you,</p>
+% if object.company_id.name and object.company_id.email:
+    ${object.company_id.name | safe}
+% endif
+]]>
+            </field>
+            <field name="auto_delete" eval="False"/>
+            <field name="user_signature" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="helpdesk_team_view_form_extend" model="ir.ui.view">
+        <field name="name">helpdesk.team.view.form.extend</field>
+        <field name="model">helpdesk.team</field>
+        <field name="inherit_id" ref="helpdesk.helpdesk_team_view_form"/>
+        <field name="arch" type="xml">
+            <div id="productivity" position="inside">
+                <div class="col-lg-6 o_setting_box">
+                    <div class="o_setting_right_pane">
+                        <label for="is_jobcard_team"/>
+                        <div class="text-muted">
+                            Use this helpdesk team for Job Cards only.
+                        </div>
+                        <div>
+                            <field name="is_jobcard_team"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>
