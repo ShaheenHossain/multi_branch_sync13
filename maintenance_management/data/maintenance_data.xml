@@ -8,6 +8,7 @@
         <field name="stage_ids" eval="False"/> <!-- eval=False to don't get the default stage. New stages are setted below-->
         <field name="use_sla" eval="True"/>
         <field name="is_jobcard_team" eval="True"/>
+        <field name="allow_delete" eval="True"/>
     </record>
 
     <!--Out Of Warranty Team-->
@@ -17,6 +18,7 @@
         <field name="stage_ids" eval="False"/> <!-- eval=False to don't get the default stage. New stages are setted below-->
         <field name="use_sla" eval="True"/>
         <field name="is_jobcard_team" eval="True"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <!--Installation Team-->
@@ -26,6 +28,7 @@
         <field name="stage_ids" eval="False"/> <!-- eval=False to don't get the default stage. New stages are setted below-->
         <field name="use_sla" eval="True"/>
         <field name="is_jobcard_team" eval="True"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <!-- stage "New" gets created by default with sequence 0-->
@@ -35,6 +38,7 @@
         <field name="team_ids" eval="[(4, ref('helpdesk.helpdesk_team1')), (4, ref('helpdesk_team_within_warranty')), (4, ref('helpdesk_team_out_of_warranty')), (4, ref('helpdesk_team_installation'))]"/>
         <field name="is_close" eval="False"/>
         <field name="template_id" ref="helpdesk.new_ticket_request_email_template"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="stage_assigned" model="helpdesk.stage">
@@ -43,8 +47,10 @@
         <field name="team_ids" eval="[(4, ref('helpdesk_team_within_warranty')), (4, ref('helpdesk_team_out_of_warranty'))]"/>
         <field name="is_close" eval="False"/>
         <field name="is_request_spare_parts" eval="False"/>
+        <field name="is_create_quotation" eval="True"/>
         <field name="is_return_and_refund" eval="True"/>
         <field name="is_replace_and_invoice" eval="True"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="stage_repair_in_progress" model="helpdesk.stage">
@@ -55,6 +61,7 @@
         <field name="is_request_spare_parts" eval="True"/>
         <field name="is_return_and_refund" eval="False"/>
         <field name="is_replace_and_invoice" eval="False"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="stage_ready_for_delivery" model="helpdesk.stage">
@@ -62,6 +69,7 @@
         <field name="sequence">4</field>
         <field name="team_ids" eval="[(4, ref('helpdesk_team_within_warranty')), (4, ref('helpdesk_team_out_of_warranty'))]"/>
         <field name="is_close" eval="False"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="stage_waiting_customer_approval" model="helpdesk.stage">
@@ -69,6 +77,7 @@
         <field name="sequence">2</field>
         <field name="team_ids" eval="[(4, ref('helpdesk_team_out_of_warranty'))]"/>
         <field name="is_close" eval="False"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="stage_delivered" model="helpdesk.stage">
@@ -76,6 +85,7 @@
         <field name="sequence">4</field>
         <field name="team_ids" eval="[(4, ref('helpdesk_team_within_warranty')), (4, ref('helpdesk_team_out_of_warranty'))]"/>
         <field name="is_close" eval="True"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="helpdesk.stage_in_progress" model="helpdesk.stage">
@@ -83,6 +93,7 @@
         <field name="sequence">1</field>
         <field name="team_ids" eval="[(4, ref('helpdesk.helpdesk_team1'))]"/>
         <field name="is_close" eval="False"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="stage_installation_in_progress" model="helpdesk.stage">
@@ -90,6 +101,7 @@
         <field name="sequence">1</field>
         <field name="team_ids" eval="[(4, ref('helpdesk_team_installation'))]"/>
         <field name="is_close" eval="False"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="stage_done" model="helpdesk.stage">
@@ -97,6 +109,7 @@
         <field name="sequence">2</field>
         <field name="team_ids" eval="[(4, ref('helpdesk_team_installation'))]"/>
         <field name="is_close" eval="True"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 
     <record id="helpdesk.stage_cancelled" model="helpdesk.stage">
@@ -105,5 +118,6 @@
         <field name="team_ids" eval="[(4, ref('helpdesk.helpdesk_team1')), (4, ref('helpdesk_team_within_warranty')), (4, ref('helpdesk_team_out_of_warranty')), (4, ref('helpdesk_team_installation'))]"/>
         <field name="is_close" eval="True"/>
         <field name="fold" eval="True"/>
+        <field name="allow_delete" eval="False"/>
     </record>
 </odoo>

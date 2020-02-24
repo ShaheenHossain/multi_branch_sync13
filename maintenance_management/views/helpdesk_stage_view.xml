@@ -6,9 +6,11 @@
         <field name="inherit_id" ref="helpdesk.helpdesk_stage_view_form"/>
         <field name="arch" type="xml">
             <field name="fold" position="after">
+                <field name="is_create_quotation"/>
                 <field name="is_request_spare_parts"/>
                 <field name="is_return_and_refund"/>
                 <field name="is_replace_and_invoice"/>
+                <field name="allow_delete"/>
             </field>
         </field>
     </record>

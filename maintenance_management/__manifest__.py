@@ -17,10 +17,10 @@
         "security/ir.model.access.csv",
         "wizard/request_stock_wizard_view.xml",
         "views/helpdesk_stage_view.xml",
+        "views/sale_order_view.xml",
         "views/helpdesk_ticket_view.xml",
         "views/stock_warehouse_view.xml",
         "views/product_template_view.xml",
-        "views/sale_order_view.xml",
         "views/helpdesk_team_view.xml",
         "views/job_card_report.xml",
         "views/stock_picking_view.xml"

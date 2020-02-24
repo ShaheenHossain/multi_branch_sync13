@@ -39,6 +39,7 @@ class HelpdeskTicket(models.Model):
     is_paper_based_jc = fields.Boolean("Paper Based Job Card", default=False, help="Check if paper based jobcard.")
     jobcard_file = fields.Binary("Job Card File", help="Job card document for paper based job card.")
     jobcard_reference = fields.Char("Reference", help="Paper Based Job Card Reference.")
+    is_create_quotation = fields.Boolean("Create Quotation", related="stage_id.is_create_quotation",default=False, help="Allow Create Quotation in this ticket.")
     is_request_spare_parts = fields.Boolean("Request Spare Parts", related="stage_id.is_request_spare_parts", default=False, help="Allow Request Spare Parts in this ticket.")
     is_return_and_refund = fields.Boolean("Return And Refund Device", related="stage_id.is_return_and_refund", help="Allow Return And Refung device in this ticket.")
     is_replace_and_invoice = fields.Boolean("Replace And Generate Invoice", related="stage_id.is_replace_and_invoice", help="Allow replace and invoice generation in this stage.")
@@ -104,16 +105,40 @@ class HelpdeskTicket(models.Model):
                                     help="Delivery count for this jobcard ticket.")
     invoice_count = fields.Integer("Invoice", compute="get_invoice_count", store=False,
                                     help="Invoice count for this jobcard ticket.")
+    order_count = fields.Integer("Order", compute="get_order_count", store=False,
+                                 help="Sale Order Count for this jobcard ticket.")
+
+    def get_order_count(self):
+        sale_order_obj = self.env["sale.order"]
+        for ticket in self:
+            ticket.order_count = len(sale_order_obj.search([("job_card_id", '=', ticket.id)]).ids)
+
+
+    def unlink(self):
+        if self.mapped("is_job_card") and False in self.mapped("stage_id").mapped("allow_delete"):
+            raise Warning("Job Card can not be deleted, Allow deletion from stages.")
+        super(HelpdeskTicket, self).unlink()
 
     def get_delivery_count(self):
         stock_picking_obj = self.env["stock.picking"]
+        sale_order_obj = self.env["sale.order"]
         for ticket in self:
-            ticket.delivery_count = len(stock_picking_obj.search([('jobcard_ticket_id', "=", ticket.id)]).ids)
+            delivery_count = len(stock_picking_obj.search([('jobcard_ticket_id', "=", ticket.id)]).ids)
+            sale_orders = sale_order_obj.search([("job_card_id", '=', ticket.id)])
+            if sale_orders and sale_orders.mapped("picking_ids"):
+                delivery_count += len(sale_orders.mapped("picking_ids").ids)
+            ticket.delivery_count = delivery_count
+
 
     def get_invoice_count(self):
         account_move_obj = self.env["account.move"]
+        sale_order_obj = self.env["sale.order"]
         for ticket in self:
-            ticket.invoice_count = len(account_move_obj.search([('jobcard_ticket_id', "=", ticket.id)]).ids)
+            invoice_count = len(account_move_obj.search([('jobcard_ticket_id', "=", ticket.id)]).ids)
+            sale_orders = sale_order_obj.search([("job_card_id", '=', ticket.id)])
+            if sale_orders and sale_orders.mapped("invoice_ids"):
+                invoice_count += len(sale_orders.mapped("invoice_ids").ids)
+            ticket.invoice_count = invoice_count
 
     @api.constrains("warranty_type", "job_card_type")
     def job_card_type_constrains(self):
@@ -164,6 +189,7 @@ class HelpdeskTicket(models.Model):
             if not ticket.workorder_lines:
                 raise Warning(_("No Workorder Lines To Request Spare Parts."))
 
+            existing_pickings = stock_picking_obj.search([('jobcard_ticket_id', "=", self.id), ('state', '!=', 'cancel')])
             picking_fields = stock_picking_obj.fields_get()
             picking_data = stock_picking_obj.default_get(picking_fields)
             out_picking_type = ticket.warehouse_id.out_type_id
@@ -176,12 +202,19 @@ class HelpdeskTicket(models.Model):
             move_vals = []
             move_line_vals = []
             for line in ticket.workorder_lines:
+                quantity = line.quantity
+                existing_move_lines_qty = sum(existing_pickings.mapped("move_line_ids_without_package").filtered(lambda move: move.product_id == line.product_id).mapped("qty_done"))
+                if existing_move_lines_qty >= line.quantity:
+                    continue
+                elif existing_move_lines_qty < line.quantity and existing_move_lines_qty > 0:
+                    quantity -= existing_move_lines_qty
+
                 #Stock Move
                 tmp_stock_move = stock_move_obj.new({
                     "product_id": line.product_id.id,
                     "name": line.product_id.display_name,
                     "product_uom": line.uom_id.id,
-                    "product_uom_qty": line.quantity
+                    "product_uom_qty": quantity
                 })
                 tmp_stock_move.onchange_product()
                 tmp_stock_move.onchange_quantity()
@@ -210,11 +243,31 @@ class HelpdeskTicket(models.Model):
                 'jobcard_ticket_id': ticket.id,
             })
             out_picking = stock_picking_obj.create(out_picking_vals)
+            ticket.workorder_lines.picking_id = out_picking.id
+
+    def action_view_orders(self):
+        action = self.env.ref('sale.action_orders').read()[0]
+        sale_order_obj = self.env["sale.order"]
+        orders = sale_order_obj.search([('job_card_id', "=", self.id)])
+        if len(orders) > 1:
+            action['domain'] = [('id', 'in', orders.ids)]
+        elif orders:
+            form_view = [(self.env.ref('sale.view_order_form').id, 'form')]
+            if 'views' in action:
+                action['views'] = form_view + [(state, view) for state, view in action['views'] if view != 'form']
+            else:
+                action['views'] = form_view
+            action['res_id'] = orders.id
+        action['context'] = dict(self._context, default_partner_id=self.partner_id.id)
+        return action
 
     def action_view_pickings(self):
         action = self.env.ref('stock.action_picking_tree_all').read()[0]
         stock_picking_obj = self.env["stock.picking"]
+        sale_order_obj = self.env["sale.order"]
+        orders = sale_order_obj.search([('job_card_id', "=", self.id)])
         pickings = stock_picking_obj.search([('jobcard_ticket_id', "=", self.id)])
+        pickings += orders.mapped("picking_ids")
         if len(pickings) > 1:
             action['domain'] = [('id', 'in', pickings.ids)]
         elif pickings:
@@ -238,7 +291,10 @@ class HelpdeskTicket(models.Model):
 
     def action_view_invoices(self):
         invoice_obj = self.env["account.move"]
+        sale_order_obj = self.env["sale.order"]
+        orders = sale_order_obj.search([('job_card_id', "=", self.id)])
         invoices = invoice_obj.search([('jobcard_ticket_id', '=', self.id)])
+        invoices += orders.mapped("invoice_ids")
         action = self.env.ref('account.action_move_out_invoice_type').read()[0]
         if len(invoices) > 1:
             action['domain'] = [('id', 'in', invoices.ids)]
@@ -281,6 +337,9 @@ class HelpdeskTicket(models.Model):
                 if not ticket.sale_order_id.picking_ids.filtered(lambda picking: picking.state == 'done'):
                     raise Warning(_("No transferred deliveries in sale order %s to return." % ticket.sale_order_id.name))
 
+                if not ticket.warehouse_id.wh_scrap_location_id.id:
+                    raise Warning(_("Configure scrap location in warehouse %s" % ticket.warehouse_id.display_name))
+
                 pickings = ticket.sale_order_id.picking_ids.filtered(lambda picking: picking.state == 'done' and picking.mapped("move_lines").mapped("product_id") in ticket.product_id)
                 pickings_to_return = pickings and pickings[0] or False
                 if not pickings_to_return:
@@ -305,6 +364,7 @@ class HelpdeskTicket(models.Model):
                 return_picking_wiz = stock_return_picking_obj.create(return_picking_vals)
                 new_picking_id, picking_type_id = return_picking_wiz._create_returns()
                 new_picking = stock_picking_obj.browse(new_picking_id)
+                new_picking.location_dest_id = ticket.warehouse_id.wh_scrap_location_id.id
                 new_picking.jobcard_ticket_id = ticket.id
                 ticket.replacement_return_picking_id = new_picking.id
             except Exception as e:
@@ -413,10 +473,12 @@ class HelpdeskTicket(models.Model):
             if not sale_order_line:
                 raise Warning(_("No Line with product %s in sale order %s" % (ticket.product_id.displat_name, ticket.sale_order_id.name)))
             invoice_line_data = sale_order_line._prepare_invoice_line()
+            new_product_price_unit = self.replacement_product_id.uom_id._compute_price(self.replacement_product_id.lst_price, self.replacement_product_id.uom_id)
             invoice_line_data.update({
                 'product_id': ticket.replacement_product_id.id,
                 'name': ticket.replacement_product_id.display_name,
-                'quantity': invoice_line_data.get('quantity', 1) if invoice_line_data.get('quantity', 1) > 0 else 1
+                'quantity': invoice_line_data.get('quantity', 1) if invoice_line_data.get('quantity', 1) > 0 else 1,
+                'price_unit': new_product_price_unit
             })
             invoice_line_vals.append((0, 0, invoice_line_data))
 
@@ -585,4 +647,3 @@ class HelpdeskWorkorder(models.Model):
             self.price_unit = self.product_id.uom_id._compute_price(self.product_id.lst_price, self.product_id.uom_id)
             if not self.quantity or self.quantity < 0:
                 self.quantity = 1
-

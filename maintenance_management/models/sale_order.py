@@ -8,6 +8,7 @@ class SaleOrder(models.Model):
 
     has_installation_product = fields.Boolean("Has Installation Product", compute="get_installation_product", store=False)
     jobcard_count = fields.Integer("Jobcard Count", compute="get_jobcard_count", store=False)
+    job_card_id = fields.Many2one("helpdesk.ticket", string="Job Card", help="Related Job Card Reference")
 
     def get_jobcard_count(self):
         for order in self:

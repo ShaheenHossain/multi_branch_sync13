@@ -32,7 +32,7 @@
         <field name="model">hardware.type</field>
         <field name="arch" type="xml">
             <search string="Hardware Types">
-                <field name="name" string="SIM" filter_domain="['|', ('name', 'ilike', self),('serial_no', 'ilike', self)]"/>
+                <field name="name" string="Hardware Type" filter_domain="[('name', 'ilike', self)]"/>
             </search>
         </field>
     </record>

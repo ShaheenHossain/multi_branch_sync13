@@ -41,6 +41,7 @@
         <field name="arch" type="xml">
 
             <button name="assign_ticket_to_self" position="after">
+                <button name="%(maintenance_management.action_jobcard_quotation)d" string="Create Quotation" class="oe_highlight" type="action" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': [('is_create_quotation', '!=', True)]}"/>
                 <button name="request_spare_parts" string="Request Spare Parts" type="object"  class="oe_highlight" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': ['|', '|', '|', ('job_card_type', '!=', 'repair'), ('is_request_spare_parts', '!=', True), ('is_job_card', '!=', True), '&amp;', ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '!=', True)]}"/>
                 <button name="return_device_to_scrap" string="Return Device To Scrap" type="object" class="oe_highlight" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': ['|', '|', '|', ('warranty_type', '!=', 'out_of_warranty'), ('return_to_scrap_picking_id', '!=', False), '&amp;', ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '=', True)]}"/>
                 <button name="return_and_refund_device" string="Return and Refund Device" type="object"  class="oe_highlight" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': ['|', '|', '|', '|', ('warranty_type', '=', 'out_of_warranty'), ('job_card_type', '!=', 'replace'), ('is_return_and_refund', '!=', True), ('is_job_card', '!=', True), '&amp;', ('replacement_return_picking_id', '!=', False), ('replacement_refund_invoice_id', '!=', False)]}"/>
@@ -48,6 +49,9 @@
             </button>
 
             <div name="button_box" position="inside">
+                <button type="object" name="action_view_orders" class="oe_stat_button" icon="fa-truck" attrs="{'invisible': [('order_count', '=', 0)]}" groups="base.group_user">
+                    <field name="order_count" widget="statinfo" string="Order"/>
+                </button>
                 <button type="object" name="action_view_pickings" class="oe_stat_button" icon="fa-truck" attrs="{'invisible': [('delivery_count', '=', 0)]}" groups="base.group_user">
                     <field name="delivery_count" widget="statinfo" string="Delivery"/>
                 </button>
@@ -76,6 +80,7 @@
 
             <field name="sla_deadline" position="after">
                 <field name="is_job_card" invisible="1"/>
+                <field name="is_create_quotation" invisible="1"/>
                 <field name="is_request_spare_parts" invisible="1"/>
                 <field name="is_return_and_refund" invisible="1"/>
                 <field name="is_replace_and_invoice" invisible="1"/>
@@ -106,7 +111,7 @@
                     <page name="job_card_information" string="Job Card Information">
                         <group name="job_Card_information_main" string="Job Card Information">
                             <group name="job_Card_information_left">
-                                <field name="product_id" attrs="{'required': [('is_paper_based_jc', '!=', True)]}"/>
+                                <field name="product_id" attrs="{'required': [('is_paper_based_jc', '!=', True),('is_job_card', '=', True)]}"/>
                                 <field name="item_code"/>
                                 <field name="item_description"/>
                                 <field name="serial_no"/>
@@ -120,7 +125,7 @@
                                     <b>Month : </b><field name="duration_month" placeholder="MM" class="col-3"/>
                                     <b style="padding-left:10px;">Year : </b><field name="duration_year" placeholder="YYYY" class="col-3"/>
                                 </div>
-                                <field name="warehouse_id" required="1"/>
+                                <field name="warehouse_id" attrs="{'required': [('is_job_card', '=', True)]}"/>
                             </group>
                         </group>
                         <group name="warranty_information_main" string="Warranty Information">
@@ -196,7 +201,8 @@
         <field name="res_model">helpdesk.ticket</field>
         <field name="view_mode">tree,form,activity</field>
         <field name="search_view_id" ref="helpdesk.helpdesk_tickets_view_search"/>
-        <field name="domain">['|', '&amp;', ('is_job_card', '=', True), ('is_private_jc', '!=', True), ('user_id', '=', uid)]</field>
+        <!--<field name="domain">['&amp;',('is_job_card', '=', True), '|', '&amp;',('is_private_jc', '!=', True), '|', ('user_id', '=', uid),('user_id', '=', False), '&amp;',('is_private_jc', '=', True), ('user_id', '=', uid)]</field>-->
+        <field name="domain">[('is_job_card', '=', True), ('is_private_jc', '!=', True)]</field>
         <field name="context">{"default_is_job_card": True, "default_is_private_jc": False}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -227,5 +233,5 @@
     </record>
 
     <menuitem id="private_jobcard_menu" name="Private Job Cards" action="private_jobcard_action"
-        sequence="22" parent="helpdesk.helpdesk_ticket_menu_main" groups="maintenance_management.group_maintenance_manager"/>
+        sequence="22" parent="helpdesk.helpdesk_ticket_menu_main" groups="maintenance_management.group_maintenance_technician"/>
 </odoo>

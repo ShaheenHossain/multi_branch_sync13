@@ -6,7 +6,7 @@ from odoo import models, fields, api, _
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    jobcard_ticket_id = fields.Many2one("helpdesk.ticket", string="Job Card", help="Related Job Card.")
+    jobcard_ticket_id = fields.Many2one("helpdesk.ticket", string="Job Card", ondelete="restrict", help="Related Job Card.")
     picking_id = fields.Many2one("stock.picking", "Transfer Request", help="Related Transfer Requests.")
     transfer_request_count = fields.Integer("Transfer Reqeust Count", compute="get_transfer_request_count", store=False)
 
