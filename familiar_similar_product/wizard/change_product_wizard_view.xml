@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Replace Product Wizard Form -->
+    <record id="replace_product_wizard_form" model="ir.ui.view">
+        <field name="name">change.product.wizard.form</field>
+        <field name="model">change.product.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Replace Product">
+                <field name="product_id" invisible="1"/>
+                <group string="Replace Product" >
+                    <field name="change_product_line_ids" nolabel="1">
+                        <tree editable="top" create="0" delete="0">
+                            <field name="change" nolabel="1"/>
+                            <field name="product_id"/>
+                            <field name="warehouse_id"/>
+                            <field name="quantity"/>
+                            <field name="price"/>
+                            <field name="change_product_wizard_id" invisible="1"/>
+                        </tree>
+                        <form>
+                            <sheet>
+                                <group string="Replace Product Line">
+                                    <field name="change" nolabel="1"/>
+                                    <field name="product_id"/>
+                                    <field name="warehouse_id"/>
+                                    <field name="quantity"/>
+                                    <field name="price"/>
+                                    <field name="change_product_wizard_id" invisible="1"/>
+                                </group>
+                            </sheet>
+                        </form>
+                    </field>
+                </group>
+                <footer>
+                    <button name="process_replace_product" string="Replace Product" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Replace Product Wizard Action -->
+    <record id="action_replace_product_wizard" model="ir.actions.act_window">
+        <field name="name">Replace Product Wizard</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">change.product.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="replace_product_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

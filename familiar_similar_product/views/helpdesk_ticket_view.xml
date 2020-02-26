@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="jobcard_spare_part_inherit_form" model="ir.ui.view">
+        <field name="name">jobcard.spare.part.inherit.form</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="priority" eval="70"/>
+        <field name="inherit_id" ref="maintenance_management.helpdesk_ticket_jobcard_inherit_form"/>
+        <field name="arch" type="xml">
+        <xpath expr="//notebook/page[@name='workorders']" position="replace">
+            <page name="workorders" string="Work Order Lines" attrs="{'invisible': [('job_card_type', 'in', ['replace', 'installation'])]}">
+                <group name="workorders" string="Work Order Lines">
+                    <field name="workorder_lines" nolabel="1">
+                        <tree editable="top">
+                            <field name="product_id" context="{'filter_spare_parts': True, 'ticket_product_id': parent.product_id}"/>
+                            <field name="name"/>
+                            <field name="quantity"/>
+                            <field name="uom_id"/>
+                            <field name="price_unit"/>
+                            <field name="tax_ids" widget="many2many_tags"/>
+                            <field name="tax_amount"/>
+                            <field name="sub_total" readonly="1"/>
+                            <field name="helpdesk_ticket_id"/>
+                        </tree>
+                        <form>
+                            <sheet>
+                                <group string="Work Order">
+                                    <group>
+                                        <field name="helpdesk_ticket_id" invisible="1"/>
+                                        <field name="product_id" context="{'filter_spare_parts': True, 'ticket_product_id': parent.product_id}"/>
+                                        <field name="name"/>
+                                        <field name="quantity"/>
+                                        <field name="uom_id"/>
+                                    </group>
+                                    <group>
+                                        <field name="price_unit"/>
+                                        <field name="tax_ids" widget="many2many_tags"/>
+                                        <field name="tax_amount"/>
+                                        <field name="sub_total" readonly="1" force_save="1"/>
+                                    </group>
+                                </group>
+                            </sheet>
+                        </form>
+                    </field>
+                </group>
+            </page>
+        </xpath>
+        </field>
+    </record>
+</odoo>

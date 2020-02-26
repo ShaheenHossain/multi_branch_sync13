@@ -1,0 +1,5 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_similar_product_admin,auto_similar_product_admin,model_similar_product,base.group_system,1,1,1,1
+access_similar_product_user,auto_similar_product_user,model_similar_product,base.group_user,1,0,0,0
+access_similar_product_inventory_user,access_similar_product_inventory_user,model_similar_product,stock.group_stock_user,1,1,1,0
+access_similar_product_inventory_manager,access_similar_product_inventory_manager,model_similar_product,stock.group_stock_manager,1,1,1,1

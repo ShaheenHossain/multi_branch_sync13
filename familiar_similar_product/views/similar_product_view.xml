@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="similar_product_tree_view" model="ir.ui.view">
+        <field name="name">similar.product.tree.view</field>
+        <field name="model">similar.product</field>
+        <field name="arch" type="xml">
+            <tree string="Similar Products">
+                <field name="name"/>
+                <field name="product_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="similar_product_form_view" model="ir.ui.view">
+        <field name="name">similar.product.form.view</field>
+        <field name="model">similar.product</field>
+        <field name="arch" type="xml">
+            <form string="Similar Product">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h2>
+                            <field name="name"/>
+                        </h2>
+                    </div>
+                    <group name="products" string="Products">
+                        <field name="product_ids" nolabel="1" required="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="similar_product_search_view" model="ir.ui.view">
+        <field name="name">similar.product.search.view</field>
+        <field name="model">similar.product</field>
+        <field name="arch" type="xml">
+            <search string="Similar Products">
+                <field name="name" string="Similar Product" filter_domain="[('name', 'ilike', self)"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="similar_product_action" model="ir.actions.act_window">
+        <field name="name">Similar Products</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">similar.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem action="similar_product_action" id="menu_similar_product" groups="stock.group_stock_user"
+        parent="sale.product_menu_catalog" string="Similar Products" sequence="4"/>
+
+</odoo>

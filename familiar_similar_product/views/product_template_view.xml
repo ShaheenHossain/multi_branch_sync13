@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_spare_part_inherit_form" model="ir.ui.view">
+        <field name="name">product.spare.part.inherit.form</field>
+        <field name="model">product.template</field>
+        <field name="priority" eval="81"/>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']" position="inside">
+                <div attrs="{'invisible':[('type', '=', 'service')]}">
+                    <field name="is_spare_part_product"/>
+                    <label for="is_spare_part_product"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

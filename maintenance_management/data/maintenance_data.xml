@@ -8,7 +8,6 @@
         <field name="stage_ids" eval="False"/> <!-- eval=False to don't get the default stage. New stages are setted below-->
         <field name="use_sla" eval="True"/>
         <field name="is_jobcard_team" eval="True"/>
-        <field name="allow_delete" eval="True"/>
     </record>
 
     <!--Out Of Warranty Team-->
@@ -18,7 +17,6 @@
         <field name="stage_ids" eval="False"/> <!-- eval=False to don't get the default stage. New stages are setted below-->
         <field name="use_sla" eval="True"/>
         <field name="is_jobcard_team" eval="True"/>
-        <field name="allow_delete" eval="False"/>
     </record>
 
     <!--Installation Team-->
@@ -28,7 +26,6 @@
         <field name="stage_ids" eval="False"/> <!-- eval=False to don't get the default stage. New stages are setted below-->
         <field name="use_sla" eval="True"/>
         <field name="is_jobcard_team" eval="True"/>
-        <field name="allow_delete" eval="False"/>
     </record>
 
     <!-- stage "New" gets created by default with sequence 0-->
@@ -38,7 +35,7 @@
         <field name="team_ids" eval="[(4, ref('helpdesk.helpdesk_team1')), (4, ref('helpdesk_team_within_warranty')), (4, ref('helpdesk_team_out_of_warranty')), (4, ref('helpdesk_team_installation'))]"/>
         <field name="is_close" eval="False"/>
         <field name="template_id" ref="helpdesk.new_ticket_request_email_template"/>
-        <field name="allow_delete" eval="False"/>
+        <field name="allow_delete" eval="True"/>
     </record>
 
     <record id="stage_assigned" model="helpdesk.stage">
