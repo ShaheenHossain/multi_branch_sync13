@@ -13,7 +13,6 @@
     'data': [
         "security/ir.model.access.csv",
         "views/product_template_view.xml",
-        "views/product_product_view.xml",
         "views/helpdesk_ticket_view.xml",
         "views/similar_product_view.xml",
         "wizard/change_product_wizard_view.xml",

@@ -12,6 +12,14 @@
                     <label for="is_spare_part_product"/>
                 </div>
             </xpath>
+            <xpath expr="//notebook/page[@name='general_information']" position="inside">
+                <group name="similar_products" string="Similar Products" attrs="{'invisible': ['|', ('is_spare_part_product', '=', True), ('type', '=', 'service')]}">
+                    <field name="similar_product_ids" nolabel="1"/>
+                </group>
+                <group name="spare_parts" string="Spare Parts" attrs="{'invisible': ['|', ('is_spare_part_product', '=', True), ('type', '=', 'service')]}">
+                    <field name="spare_part_product_ids" domain="[('is_spare_part_product', '=', True)]" nolabel="1"/>
+                </group>
+            </xpath>
         </field>
     </record>
 </odoo>

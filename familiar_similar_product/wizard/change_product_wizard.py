@@ -12,8 +12,21 @@ class ChangeProductWizard(models.TransientModel):
     product_id = fields.Many2one("product.product")
     change_product_line_ids = fields.One2many("change.product.line", "change_product_wizard_id", string="Change Product Lines")
 
+    def get_product_qty(self, product, warehouse):
+        ctx = dict(self._context)
+        ctx.update({"warehouse": warehouse.id})
+        products = product.filtered(lambda p: p.type != 'service')
+        res = products.with_context(ctx)._compute_quantities_dict(self._context.get('lot_id'),
+                                                                  self._context.get('owner_id'),
+                                                                  self._context.get('package_id'),
+                                                                  self._context.get('from_date'),
+                                                                  self._context.get('to_date'))
+        qty = res.get(product.id, {}).get('qty_available', 0.0)
+        return qty
+
     @api.model
     def default_get(self, fields):
+        product_obj = self.env["product.product"]
         ctx = dict(self._context)
         result = super(ChangeProductWizard, self).default_get(fields)
         if not self._context.get('active_id', False):
@@ -21,10 +34,9 @@ class ChangeProductWizard(models.TransientModel):
         replace_lines_data = []
         user_warehouses = self.env["stock.warehouse"].search([('branch_id', 'in', self.env.user.branch_ids.ids)])
         so_line = self.env["sale.order.line"].browse(self._context.get('active_id'))
-        for similar_product in so_line.product_id.similar_product_ids:
+        for similar_product in so_line.product_id.product_tmpl_id.similar_product_ids:
             for warehouse in user_warehouses:
-                ctx.update({"warehouse": warehouse.id})
-                product_quantity = similar_product.with_context(ctx).qty_available
+                product_quantity = self.get_product_qty(similar_product, warehouse)
                 similar_product_price_unit = similar_product.uom_id._compute_price(similar_product.lst_price, similar_product.uom_id)
                 if product_quantity >= so_line.product_uom_qty:
                     replace_lines_data.append([0, 0, {
