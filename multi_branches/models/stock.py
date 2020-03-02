@@ -32,8 +32,8 @@ class Warehouse(models.Model):
             warehouse.wh_qc_stock_loc_id.write({'branch_id': vals.get('branch_id')})
             warehouse.wh_output_stock_loc_id.write({'branch_id': vals.get('branch_id')})
             warehouse.wh_pack_stock_loc_id.write({'branch_id': vals.get('branch_id')})
-            # v12 base problem company not change in buy rule
-            warehouse.buy_pull_id.write({'company_id': vals.get('company_id')})
+            # v13 base problem company not change in buy rule
+            # warehouse.buy_pull_id.write({'company_id': vals.get('company_id')})
         return warehouse
 
     @api.model
