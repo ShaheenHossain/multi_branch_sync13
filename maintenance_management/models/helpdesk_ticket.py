@@ -392,7 +392,7 @@ class HelpdeskTicket(models.Model):
             refund_invoice_wiz = account_move_reversal_obj.create(refund_invoice_wiz_data)
             refund_action = refund_invoice_wiz.with_context(ctx).reverse_moves()
             reverse_moves = refund_action.get("res_id", False) and account_move_obj.browse(refund_action.get('res_id')) or refund_action.get('domain', False) and account_move_obj.search(refund_action.get('domain')) or False
-            reverse_moves = reverse_moves.filtered(lambda l: l.invoice_payment_state == 'paid' and l.type == 'out_invoice').line_ids.filtered(lambda line: line.product_id != ticket.product_id).unlink()
+            reverse_moves.line_ids.filtered(lambda line: line.product_id and line.product_id != ticket.product_id).unlink()
             reverse_moves and reverse_moves.write({'jobcard_ticket_id': ticket.id})
             ticket.replacement_refund_invoice_id = reverse_moves and reverse_moves.ids[0] or False
         return True
@@ -618,9 +618,9 @@ class HelpdeskWorkorder(models.Model):
 
     @api.constrains("quantity")
     def quantity_constrains(self):
-        self.ensure_one()
-        if self.quantity and self.quantity < 0:
-            raise Warning(_("Quantity Can Not Be Less Than 0."))
+        for record in self:
+            if record.quantity and record.quantity < 0:
+                raise Warning(_("Quantity Can Not Be Less Than 0."))
 
     @api.depends("tax_ids", "price_unit", "quantity")
     def get_subtotal_amount(self):
