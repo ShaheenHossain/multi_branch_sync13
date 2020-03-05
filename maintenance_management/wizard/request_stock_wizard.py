@@ -18,7 +18,9 @@ class RequestStockWizard(models.TransientModel):
         request_lines_data = []
         picking = self.env["stock.picking"].browse(self._context.get('active_id'))
         warehouse_ids = self.env["stock.warehouse"].search([('branch_id', '=', picking.branch_id.id), ('id', '!=', picking.sale_id.warehouse_id.id)])
-        for line in picking.move_line_ids_without_package:
+        for line in picking.move_ids_without_package:
+            if (line.reserved_availability + line.quantity_done) >= line.product_uom_qty:
+                continue
             for warehouse in warehouse_ids:
                 ctx.update({"warehouse": warehouse.id})
                 product_quantity = line.product_id.with_context(ctx).qty_available
