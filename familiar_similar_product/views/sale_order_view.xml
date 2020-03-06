@@ -10,7 +10,7 @@
                 <field name="is_out_of_stock" invisible="1"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
-                <button type="action" name="%(familiar_similar_product.action_replace_product_wizard)d" icon="fa-refresh" attrs="{'invisible': ['|',('is_out_of_stock', '=', False), ('parent.state', 'not in', ['draft', 'sent'])]}"/>
+                <button type="action" name="%(familiar_similar_product.action_replace_product_wizard)d" icon="fa-refresh" attrs="{'invisible': [('parent.state', 'not in', ['draft', 'sent'])]}"/>
             </xpath>
         </field>
     </record>

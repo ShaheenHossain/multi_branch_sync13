@@ -12,6 +12,7 @@
                     <field name="workorder_lines" nolabel="1">
                         <tree editable="top">
                             <field name="product_id" context="{'filter_spare_parts': True, 'ticket_product_id': parent.product_id}"/>
+                            <button type="action" name="%(familiar_similar_product.action_replace_product_wizard)d" icon="fa-refresh"/><!-- attrs="{'invisible': [('parent.state', 'not in', ['draft', 'sent'])]}"-->
                             <field name="name"/>
                             <field name="quantity"/>
                             <field name="uom_id"/>

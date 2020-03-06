@@ -207,8 +207,13 @@ class WarrantyDetail(models.Model):
         return action
 
     def action_confirm(self):
+        current_date = fields.Datetime.now()
+        warranty_term_months = self.product_id.warranty_id.warranty_months or 0
+        end_date = current_date + relativedelta(months=warranty_term_months)
         self.confirm_by = self.env.uid
-        self.confirm_date = fields.Datetime.now()
+        self.confirm_date = current_date
+        self.start_date = current_date
+        self.end_date = end_date
         self.state = 'confirm'
 
     def action_pending(self):

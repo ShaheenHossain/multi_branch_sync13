@@ -33,12 +33,17 @@ class ChangeProductWizard(models.TransientModel):
             return result
         replace_lines_data = []
         user_warehouses = self.env["stock.warehouse"].search([('branch_id', 'in', self.env.user.branch_ids.ids)])
-        so_line = self.env["sale.order.line"].browse(self._context.get('active_id'))
-        for similar_product in so_line.product_id.product_tmpl_id.similar_product_ids:
+        line = self.env[self._context.get('active_model')].browse(self._context.get('active_id'))
+        for similar_product in line.product_id.product_tmpl_id.similar_product_ids:
+            line_qty = 0.0
+            if self._context.get("active_model") == "helpdesk.workorder":
+                line_qty = line.quantity
+            else:
+                line_qty = line.product_uom_qty
             for warehouse in user_warehouses:
                 product_quantity = self.get_product_qty(similar_product, warehouse)
                 similar_product_price_unit = similar_product.uom_id._compute_price(similar_product.lst_price, similar_product.uom_id)
-                if product_quantity >= so_line.product_uom_qty:
+                if product_quantity >= line_qty:
                     replace_lines_data.append([0, 0, {
                         "change": False,
                         "product_id": similar_product.id,
@@ -59,11 +64,16 @@ class ChangeProductWizard(models.TransientModel):
 
         if len(self.change_product_line_ids.filtered(lambda line: line.change)) == 1:
             replace_product_line = self.change_product_line_ids.filtered(lambda line: line.change)
-            so_line = self.env["sale.order.line"].browse(self._context.get('active_id'))
-            so_line.product_id = replace_product_line.product_id
-            so_line_qty = so_line.product_uom_qty
-            so_line.product_id_change()
-            so_line.product_uom_qty = so_line_qty
+            line = self.env[self._context.get("active_model")].browse(self._context.get('active_id'))
+            line.product_id = replace_product_line.product_id
+            if self._context.get("active_model") == "sale.order.line":
+                line_qty = line.product_uom_qty
+                line.product_id_change()
+                line.product_uom_qty = line_qty
+            else:
+                line_qty = line.quantity
+                line.product_id_onchange()
+                line.quantity = line_qty
         return True
 
 

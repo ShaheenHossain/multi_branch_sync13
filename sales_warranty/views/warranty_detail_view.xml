@@ -28,8 +28,8 @@
             <form string="Warranty Detail">
                 <header>
                     <button name="action_confirm" type="object" string="Confirm" states="draft" class="btn-primary" />
-                    <button name="action_create_invoice" type="object" string="Create Invoice" class="btn-primary" attrs="{'invisible': ['|', ('state','!=', 'confirm'), ('invoice_id','!=',False)]}"/>
-                    <button name="action_running" type="object" string="Start" attrs="{'invisible': ['|',('state','!=','confirm'), ('is_invoice_paid','=', False)]}" class="btn-primary" />
+                    <button name="action_create_invoice" type="object" string="Create Invoice" class="btn-primary" attrs="{'invisible': ['|', '|', ('state','!=', 'confirm'), ('invoice_id','!=',False), ('warranty_cost','=', 0.0)]}"/>
+                    <button name="action_running" type="object" string="Start" attrs="{'invisible': ['|',('state','!=','confirm'), '&amp;', ('is_invoice_paid','=', False), ('warranty_cost','!=', 0.0)]}" class="btn-primary" />
                     <button name="action_cancel" type="object" string="Cancel" states="draft,confirm" class="btn-primary" />
                     <button name="action_expiry" type="object" string="Expire" states="running" class="btn-primary"/>
                     <button name="action_renew" type="object" string="Renew" attrs="{'invisible': ['|', ('state','not in', ['expired']), '|', ('is_renewed','=',True), ('is_renewable','=',False)]}" class="btn-primary" />

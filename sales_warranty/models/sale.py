@@ -3,6 +3,7 @@
 
 from odoo import fields, models
 from odoo.tools.float_utils import float_round as round
+from dateutil.relativedelta import relativedelta
 
 
 class SaleOrder(models.Model):
@@ -15,8 +16,11 @@ class SaleOrder(models.Model):
             Method for add sales warranty in order.
         """
         self.ensure_one()
+        current_date = fields.Datetime.now()
         for line in self.order_line.filtered(lambda l: l.product_id.tracking == 'serial'):
             if line.product_id.warranty_id and not self.warranty_details:
+                warranty_term_months = line.product_id.warranty_id.warranty_months or 0
+                end_date = current_date + relativedelta(months=warranty_term_months)
                 for qty in range(int(round(line.product_uom_qty,0))):
                     warranty_id = self.env['warranty.detail'].create({
                         'sale_id': line.order_id.id,
@@ -30,6 +34,9 @@ class SaleOrder(models.Model):
                         'warranty_info': line.product_id.warranty_id.warranty_info,
                         'warranty_tc': line.product_id.warranty_id.warranty_tc,
                         'tag_ids': [(6, 0, line.order_id.tag_ids.ids)],
+                        'warranty_cost': line.product_id.warranty_id.warranty_cost or 0.0,
+                        'start_date': current_date,
+                        'end_date': end_date
                     })
 
     # def action_confirm(self):
