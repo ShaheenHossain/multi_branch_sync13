@@ -22,7 +22,9 @@ class SaleOrder(models.Model):
                 warranty_term_months = line.product_id.warranty_id.warranty_months or 0
                 end_date = current_date + relativedelta(months=warranty_term_months)
                 for qty in range(int(round(line.product_uom_qty,0))):
-                    warranty_id = self.env['warranty.detail'].create({
+                    move_line_ids = self.picking_ids.mapped("move_line_ids").filtered(lambda sml: sml.product_id == line.product_id and sml.product_uom_qty > 0 or sml.qty_done > 0)
+                    serial_id = move_line_ids and move_line_ids[0].lot_id or False
+                    warranty_vals = {
                         'sale_id': line.order_id.id,
                         'sale_line_id': line.id,
                         'product_id': line.product_id.id,
@@ -36,8 +38,11 @@ class SaleOrder(models.Model):
                         'tag_ids': [(6, 0, line.order_id.tag_ids.ids)],
                         'warranty_cost': line.product_id.warranty_id.warranty_cost or 0.0,
                         'start_date': current_date,
-                        'end_date': end_date
-                    })
+                        'end_date': end_date,
+                    }
+                    serial_id and warranty_vals.update({"serial_id": serial_id.id})
+                    warranty = self.env['warranty.detail'].create(warranty_vals)
+                    return warranty
 
     # def action_confirm(self):
     #     """

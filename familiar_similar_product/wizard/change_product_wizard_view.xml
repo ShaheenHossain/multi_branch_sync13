@@ -11,20 +11,20 @@
                     <field name="change_product_line_ids" nolabel="1">
                         <tree editable="top" create="0" delete="0">
                             <field name="change" nolabel="1"/>
-                            <field name="product_id"/>
-                            <field name="warehouse_id"/>
-                            <field name="quantity"/>
-                            <field name="price"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="warehouse_id" readonly="1"/>
+                            <field name="quantity" readonly="1"/>
+                            <field name="price" readonly="1"/>
                             <field name="change_product_wizard_id" invisible="1"/>
                         </tree>
                         <form>
                             <sheet>
                                 <group string="Replace Product Line">
                                     <field name="change" nolabel="1"/>
-                                    <field name="product_id"/>
-                                    <field name="warehouse_id"/>
-                                    <field name="quantity"/>
-                                    <field name="price"/>
+                                    <field name="product_id" readonly="1"/>
+                                    <field name="warehouse_id" readonly="1"/>
+                                    <field name="quantity" readonly="1"/>
+                                    <field name="price" readonly="1"/>
                                     <field name="change_product_wizard_id" invisible="1"/>
                                 </group>
                             </sheet>
