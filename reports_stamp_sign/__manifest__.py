@@ -13,7 +13,7 @@
     'data': [
         'view/res_company_view.xml',
         'view/res_user_view.xml',
-        'view/job_card_report.xml',
+        # 'view/job_card_report.xml',
         ],
     'demo': [],
     'images': [],

@@ -7,6 +7,10 @@
         <field name="arch" type="xml">
             <field name="favicon" position="after">
                 <field name="company_stamp" widget="image"/>
+                <field name="reports_footer" />
+            </field>
+            <field name="name" position="after">
+                <h3><field name="arabic_name" placeholder="Arabic Name"/></h3>
             </field>
         </field>
     </record>
