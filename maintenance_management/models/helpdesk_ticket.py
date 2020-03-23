@@ -43,12 +43,13 @@ class HelpdeskTicket(models.Model):
     is_request_spare_parts = fields.Boolean("Request Spare Parts", related="stage_id.is_request_spare_parts", default=False, help="Allow Request Spare Parts in this ticket.")
     is_return_and_refund = fields.Boolean("Return And Refund Device", related="stage_id.is_return_and_refund", help="Allow Return And Refung device in this ticket.")
     is_replace_and_invoice = fields.Boolean("Replace And Generate Invoice", related="stage_id.is_replace_and_invoice", help="Allow replace and invoice generation in this stage.")
-    jobcard_date = fields.Date("Date", help="Job Card Creation Date")
-    hardware_type_id = fields.Many2one("hardware.type", string="Device Category", help="Related Hardware Type")
+    jobcard_date = fields.Date("Date", default=fields.Datetime.today(), help="Job Card Creation Date")
+    device_category_id = fields.Many2one("product.category", string="Device Category", help="Related Hardware Type")
     warranty_type = fields.Selection([('free_service', 'Free Service'),
                                       ('out_of_warranty', 'Out Of Warranty')], default='free_service')
     warranty_approval_type = fields.Selection([('invoice', 'Invoice'),
                                                ('warranty_card', 'Warranty Card'),
+                                               ('warranty_card_and_invoice', 'Warranty Card + Invoice'),
                                                ('manager_approval', 'Manager Approval')],
                                               string="Warranty Approval Type", default='invoice', required=True)
     warranty_approval_manager_id = fields.Many2one("res.users", "Warranty Approval Manager", help="If warranty approved by manager, Refer to the manager.")
@@ -57,17 +58,18 @@ class HelpdeskTicket(models.Model):
     product_id = fields.Many2one("product.product", string="Product")
     item_code = fields.Char("Item Code")
     item_description = fields.Char("Item Description")
-    serial_no = fields.Char("Serial No")
+    lot_id = fields.Many2one("stock.production.lot", string="Serial No", help="Related Lot / Serial No.")
     ref_no = fields.Char("Reference No")
     duration_month = fields.Integer("Month(s)")
     duration_year = fields.Integer("Year(s)")
     partner_contact = fields.Integer("Customer Contact")
     warehouse_id = fields.Many2one("stock.warehouse", string="Warehouse", default=_default_warehouse_id)
     sale_order_id = fields.Many2one("sale.order", string="Sale Order")
+    sale_order_line_id = fields.Many2one("sale.order.line", string="Sale Order Line")
     replacement_product_id = fields.Many2one("product.product", string="Replacement Product", help="Product to replace damaged product.")
     discount_product_id = fields.Many2one("product.product", string="Discount Product", help="Discount Product.")
     can_be_repaired = fields.Boolean("Can Be Repaired?", default=False, help="Check if device can be repaired or not.")
-    is_distributor_jobcard = fields.Boolean("Disctributor Job Card", default=False, help="Is this job card created for distributor?")
+    is_distributor_jobcard = fields.Boolean("Distributor Job Card", default=False, help="Is this job card created for distributor?")
     distributor_id = fields.Many2one("res.partner", string="Distributor", help="Distributor for jobcard.")
     invoice_partner = fields.Selection([('distributor', 'Distributor'),
                                         ('customer', 'Customer')], default='distributor',
@@ -78,6 +80,9 @@ class HelpdeskTicket(models.Model):
     return_to_scrap_picking_id = fields.Many2one("stock.picking", "Return To Scrap Picking", copy=False)
     replacement_refund_invoice_id = fields.Many2one("account.move", "Replacement Refund Invoice", copy=False)
     replacement_invoice_id = fields.Many2one("account.move", "Replacement Invoice", copy=False)
+    warranty_id = fields.Many2one("warranty.detail", string="Warranty Card", copy=False, help="Related Warranty Card")
+    invoice_id = fields.Many2one("account.move", string="Invoice", copy=False, help="Related Invoice")
+    warranty_end_date = fields.Date("Warranty End Date", copy=False, help="Related Warranty End Date")
 
     #Customer Complaints
     white_screen = fields.Boolean("White Screen", default=False)
@@ -94,7 +99,7 @@ class HelpdeskTicket(models.Model):
     job_card_type = fields.Selection([("repair", "Repair"),
                                       ("replace", "Replace"),
                                       ("installation", "Installation")],
-                                     string="Job Card Type", default="repair", required=True)
+                                     string="Job Card Type", help="Job Card Type : Manages flow of job card.")
     replacement_type = fields.Selection([("identical", "Identical Device"),
                                          ("higher_no_fees", "Higher Device (Without Additional Fees)"),
                                          ("higher_with_fees", "Higher Device (With Additional Fees)")],
@@ -113,6 +118,41 @@ class HelpdeskTicket(models.Model):
         for ticket in self:
             ticket.order_count = len(sale_order_obj.search([("job_card_id", '=', ticket.id)]).ids)
 
+    def write(self, vals):
+        helpdesk_stage_obj = self.env["helpdesk.stage"]
+
+        job_cards = self.filtered(lambda ticket: ticket.is_job_card)
+        helpdesk_tickets = self.filtered(lambda ticket: not ticket.is_job_card)
+
+        for job_card in job_cards:
+            warranty = job_card.sale_order_id.warranty_details.filtered(lambda sw: sw.product_id == job_card.sale_order_line_id.product_id)
+            vals_stage_id = vals.get("stage_id", False) and helpdesk_stage_obj.browse(vals.get("stage_id")) or False
+
+            if vals.get("warranty_end_date", False):
+                if self.env.user.has_group("maintenance_management.group_maintenance_supervisor") or self.env.user.has_group("maintenance_management.group_maintenance_manager"):
+                    if job_card.stage_id.is_close:
+                        raise Warning(_("Warranty End Date can not be changed for closed job cards."))
+
+                elif self.env.user.has_group("maintenance_management.group_maintenance_technician"):
+                    if not job_card.stage_id.is_new or vals_stage_id and not vals_stage_id.is_new:
+                        raise Warning(_("Technicians are allowed to change warranty end date only in 'New' Stage."))
+
+                else:
+                        raise Warning(_("Only 'Maintenance Users' are allowed to change Warranty End Date in Job Card."))
+
+            if job_card.stage_id.is_new and not vals_stage_id:
+                super(HelpdeskTicket, job_card).write(vals)
+            elif vals_stage_id and not vals_stage_id.is_cancel and not job_card.job_card_type and not vals.get('job_card_type', False):
+                raise Warning(_("Please set Job Card Type in job card '%s' to proceed." % job_card.display_name))
+            else:
+                super(HelpdeskTicket, job_card).write(vals)
+
+            if vals.get("warranty_end_date", False) and vals.get("warranty_end_date") == str(job_card.warranty_end_date):
+                warranty.end_date = job_card.warranty_end_date
+
+        super(HelpdeskTicket, helpdesk_tickets).write(vals)
+
+        return True
 
     def unlink(self):
         if self.mapped("is_job_card") and False in self.mapped("stage_id").mapped("allow_delete"):
@@ -146,6 +186,17 @@ class HelpdeskTicket(models.Model):
             if ticket.warranty_type == 'out_of_warranty' and ticket.job_card_type != 'repair':
                 raise Warning(_("When maintenance is out of warranty, only 'Repair' job cards can be created."))
 
+    @api.onchange("sale_order_line_id")
+    def sale_order_line_onchange(self):
+        for ticket in self:
+            warranty = ticket.sale_order_id.warranty_details.filtered(lambda sw: sw.product_id == ticket.sale_order_line_id.product_id)
+            stock_move_line = ticket.sale_order_id.picking_ids.mapped('move_line_ids_without_package').filtered(lambda sml: sml.product_id == ticket.sale_order_line_id.product_id)
+            ticket.product_id = ticket.sale_order_line_id.product_id.id
+            ticket.item_code = ticket.sale_order_line_id.product_id.default_code
+            ticket.item_description = ticket.sale_order_line_id.product_id.display_name
+            ticket.lot_id = stock_move_line.lot_id.id
+            ticket.warranty_end_date = warranty.end_date
+
     @api.onchange("sale_order_id")
     def sale_order_onchange(self):
         for ticket in self:
@@ -158,6 +209,7 @@ class HelpdeskTicket(models.Model):
         if self.product_id:
             self.item_code = self.product_id.default_code
             self.item_description = self.product_id.display_name
+            self.device_category_id = self.product_id.categ_id.id
 
     def check_if_spare_part_remaining(self):
         self.ensure_one()

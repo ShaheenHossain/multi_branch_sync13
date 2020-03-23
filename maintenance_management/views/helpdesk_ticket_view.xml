@@ -41,7 +41,7 @@
         <field name="arch" type="xml">
 
             <button name="assign_ticket_to_self" position="after">
-                <button name="%(maintenance_management.action_jobcard_quotation)d" string="Create Quotation" class="oe_highlight" type="action" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': [('is_create_quotation', '!=', True)]}"/>
+                <button name="%(maintenance_management.action_jobcard_quotation)d" string="Create Quotation" class="oe_highlight" type="action" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': [('is_create_quotation', '!=', True)]}" context="{'default_partner_id': partner_id}"/>
                 <button name="request_spare_parts" string="Request Spare Parts" type="object"  class="oe_highlight" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': ['|', '|', '|', ('job_card_type', '!=', 'repair'), ('is_request_spare_parts', '!=', True), ('is_job_card', '!=', True), '&amp;', ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '!=', True)]}"/>
                 <button name="return_device_to_scrap" string="Return Device To Scrap" type="object" class="oe_highlight" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': ['|', '|', '|', ('warranty_type', '!=', 'out_of_warranty'), ('return_to_scrap_picking_id', '!=', False), '&amp;', ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '=', True)]}"/>
                 <button name="return_and_refund_device" string="Return and Refund Device" type="object"  class="oe_highlight" groups="maintenance_management.group_maintenance_technician" attrs="{'invisible': ['|', '|', '|', '|', ('warranty_type', '=', 'out_of_warranty'), ('job_card_type', '!=', 'replace'), ('is_return_and_refund', '!=', True), ('is_job_card', '!=', True), '&amp;', ('replacement_return_picking_id', '!=', False), ('replacement_refund_invoice_id', '!=', False)]}"/>
@@ -49,8 +49,8 @@
             </button>
 
             <div name="button_box" position="inside">
-                <button type="object" name="action_view_orders" class="oe_stat_button" icon="fa-truck" attrs="{'invisible': [('order_count', '=', 0)]}" groups="base.group_user">
-                    <field name="order_count" widget="statinfo" string="Order"/>
+                <button type="object" name="action_view_orders" class="oe_stat_button" icon="fa-usd" attrs="{'invisible': [('order_count', '=', 0)]}" groups="base.group_user">
+                    <field name="order_count" widget="statinfo" string="Sales Order"/>
                 </button>
                 <button type="object" name="action_view_pickings" class="oe_stat_button" icon="fa-truck" attrs="{'invisible': [('delivery_count', '=', 0)]}" groups="base.group_user">
                     <field name="delivery_count" widget="statinfo" string="Delivery"/>
@@ -69,7 +69,7 @@
             </field>
 
             <field name="partner_id" position="attributes">
-                <attribute name="attrs">{'required': [('is_job_card','=',True), ('is_paper_based_jc', '!=', True)]}</attribute>
+                <attribute name="attrs">{'required': ['&amp;', '&amp;', ('is_job_card','=',True), ('is_paper_based_jc', '!=', True), '|', ('is_distributor_jobcard', '!=', True), '&amp;', ('invoice_partner', '=', 'customer'), ('is_distributor_jobcard', '=', True)]}</attribute>
             </field>
 
             <field name="partner_id" position="before">
@@ -114,34 +114,38 @@
                                 <field name="product_id" attrs="{'required': [('is_paper_based_jc', '!=', True),('is_job_card', '=', True)]}"/>
                                 <field name="item_code"/>
                                 <field name="item_description"/>
-                                <field name="serial_no"/>
+                                <field name="lot_id" attrs="{'required': [('is_paper_based_jc', '!=', True),('is_job_card', '=', True)]}"/>
                                 <field name="ref_no"/>
                             </group>
                             <group name="job_Card_information_right">
                                 <field name="jobcard_date"/>
-                                <field name="hardware_type_id"/>
+                                <field name="device_category_id"/>
                                 <label for="" name="item_sold_duration" attrs="{'invisible': [('job_card_type', '=', 'installation')]}"><b>Item Sold Duration</b></label>
                                 <div attrs="{'invisible': [('job_card_type', '=', 'installation')]}">
                                     <b>Month : </b><field name="duration_month" placeholder="MM" class="col-3"/>
                                     <b style="padding-left:10px;">Year : </b><field name="duration_year" placeholder="YYYY" class="col-3"/>
                                 </div>
-                                <field name="warehouse_id" attrs="{'required': [('is_job_card', '=', True)]}"/>
+                                <field name="warehouse_id" attrs="{'required': [('is_paper_based_jc', '!=', True),('is_job_card', '=', True)]}"/>
                             </group>
                         </group>
                         <group name="warranty_information_main" string="Warranty Information">
-                            <group name="warranty_information_left">
+                            <group name="warranty_information_left" attrs="{'invisible': [('job_card_type', '=', 'installation')]}">
+                                <field name="warranty_type" widget="radio"/>
+                                <field name="warranty_end_date"/>
+                                <field name="warranty_approval_type" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty')]}"/>
+                                <field name="warranty_approval_manager_id" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', '!=', 'manager_approval')], 'required': [('warranty_approval_type', '=', 'manager_approval'), ('warranty_type', '=', 'free_service')]}" context="{'maintenance_manager': True}" domain="[('branch_ids', 'in', branch_id)]"/>
+                                <field name="warranty_id" domain="[('sale_id', '=', sale_order_id)]" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['warranty_card', 'warranty_card_and_invoice'])]}"/>
+                                <field name="invoice_id" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['invoice', 'warranty_card_and_invoice'])]}" context="{'jobcard_invoice_check': True, 'sale_order_id': sale_order_id}"/>
+                                <field name="warranty_document" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty')]}"/>
+                            </group>
+                            <group name="warranty_information_right">
+                                <field name="sale_order_id" attrs="{'required':[('is_job_card', '=', True), ('is_paper_based_jc', '!=', True), '|', '&amp;', ('warranty_type', '=', 'free_service'), ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '!=', True)]}"/>
+                                <field name="sale_order_line_id" domain="[('order_id', '=', sale_order_id)]" attrs="{'required':[('is_job_card', '=', True), ('is_paper_based_jc', '!=', True),  '|', '&amp;', ('warranty_type', '=', 'free_service'), ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '!=', True)]}"/>
                                 <field name="can_be_repaired" attrs="{'invisible': ['|', ('warranty_type', '!=', 'out_of_warranty')]}"/>
                                 <field name="job_card_type" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '=', False)]}"/>
                                 <field name="replacement_type" attrs="{'invisible':[('job_card_type', '!=', 'replace')], 'required':[('job_card_type', '=', 'replace')]}"/>
-                                <field name="sale_order_id" attrs="{'invisible':[('job_card_type', '!=', 'replace'), '|', ('warranty_type', '!=', 'out_of_warranty'), ('can_be_repaired', '=', True)], 'required':['|', ('job_card_type', '=', 'replace'), '&amp;', ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '!=', True)]}"/>
                                 <field name="replacement_product_id" attrs="{'invisible':[('job_card_type', '!=', 'replace')], 'required':[('job_card_type', '=', 'replace')]}"/>
                                 <field name="discount_product_id" domain="[('type', '=', 'service')]" attrs="{'invisible':['|',('job_card_type', '!=', 'replace'),('replacement_type', 'not in', ['higher_no_fees', 'higher_with_fees'])], 'required':[('job_card_type', '=', 'replace'),('replacement_type', 'in', ['higher_no_fees', 'higher_with_fees'])]}"/>
-                            </group>
-                            <group name="warranty_information_right" attrs="{'invisible': [('job_card_type', '=', 'installation')]}">
-                                <field name="warranty_type" widget="radio"/>
-                                <field name="warranty_approval_type" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty')]}"/>
-                                <field name="warranty_approval_manager_id" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', '!=', 'manager_approval')], 'required': [('warranty_approval_type', '=', 'manager_approval'), ('warranty_type', '=', 'free_service')]}" context="{'maintenance_manager': True}" domain="[('branch_ids', 'in', branch_id)]"/>
-                                <field name="warranty_document" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty')]}"/>
                             </group>
                         </group>
                     </page>
@@ -167,6 +171,7 @@
                                     <field name="tax_ids" widget="many2many_tags"/>
                                     <field name="tax_amount"/>
                                     <field name="sub_total" readonly="1"/>
+                                    <field name="helpdesk_ticket_id" invisible="1"/>
                                 </tree>
                                 <form>
                                     <sheet>

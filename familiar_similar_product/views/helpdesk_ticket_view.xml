@@ -20,7 +20,7 @@
                             <field name="tax_ids" widget="many2many_tags"/>
                             <field name="tax_amount"/>
                             <field name="sub_total" readonly="1"/>
-                            <field name="helpdesk_ticket_id"/>
+                            <field name="helpdesk_ticket_id" invisible="1"/>
                         </tree>
                         <form>
                             <sheet>

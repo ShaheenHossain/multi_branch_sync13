@@ -50,9 +50,9 @@
                                             <strong>Item Description:</strong>
                                             <p class="m-0" t-field="o.item_description"/>
                                         </t>
-                                        <t t-if="o.serial_no">
+                                        <t t-if="o.lot_id">
                                             <strong>Serial No:</strong>
-                                            <p class="m-0" t-field="o.serial_no"/>
+                                            <p class="m-0" t-field="o.lot_id.name"/>
                                         </t>
                                         <t>
                                             <strong>Item Sold Duration:</strong>
@@ -74,9 +74,9 @@
                                             <strong>Warehouse:</strong>
                                             <p class="m-0" t-field="o.warehouse_id.name"/>
                                         </t>
-                                        <t t-if="o.hardware_type_id">
+                                        <t t-if="o.device_category_id">
                                             <strong>Device Category:</strong>
-                                            <p class="m-0" t-field="o.hardware_type_id.name"/>
+                                            <p class="m-0" t-field="o.device_category_id.name"/>
                                         </t>
                                     </div>
                                 </div>

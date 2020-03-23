@@ -11,3 +11,5 @@ class HelpdeskStage(models.Model):
     is_replace_and_invoice = fields.Boolean("Replace And Generate Invoice", default=False, help="Allow replace and invoice generation in this stage.")
     is_create_quotation = fields.Boolean("Create Quotation", default=False, help="Allow create quotation in this stage.")
     allow_delete = fields.Boolean("Allow Delete", default=False, help="Job Card can be deleted in this stage.")
+    is_new = fields.Boolean("New Stage", default=False, help="This is New stage for job card.")
+    is_cancel = fields.Boolean("Cancel Stage", default=False, help="This is cancel stage of job card.")

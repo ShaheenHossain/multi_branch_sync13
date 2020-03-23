@@ -16,11 +16,14 @@ class SaleOrder(models.Model):
             Method for add sales warranty in order.
         """
         self.ensure_one()
-        current_date = fields.Datetime.now()
+        warranty_start_date = fields.Datetime.now()
         for line in self.order_line.filtered(lambda l: l.product_id.tracking == 'serial'):
             if line.product_id.warranty_id and not self.warranty_details:
                 warranty_term_months = line.product_id.warranty_id.warranty_months or 0
-                end_date = current_date + relativedelta(months=warranty_term_months)
+                stock_move_line = line.order_id.picking_ids.mapped('move_line_ids_without_package').filtered(lambda sml: sml.product_id == line.product_id)
+                if stock_move_line and stock_move_line.picking_id and stock_move_line.picking_id.state == 'done':
+                    warranty_start_date = stock_move_line.picking_id.date_done.date()
+                end_date = warranty_start_date + relativedelta(months=warranty_term_months)
                 for qty in range(int(round(line.product_uom_qty,0))):
                     move_line_ids = self.picking_ids.mapped("move_line_ids").filtered(lambda sml: sml.product_id == line.product_id and sml.product_uom_qty > 0 or sml.qty_done > 0)
                     serial_id = move_line_ids and move_line_ids[0].lot_id or False
@@ -37,7 +40,7 @@ class SaleOrder(models.Model):
                         'warranty_tc': line.product_id.warranty_id.warranty_tc,
                         'tag_ids': [(6, 0, line.order_id.tag_ids.ids)],
                         'warranty_cost': line.product_id.warranty_id.warranty_cost or 0.0,
-                        'start_date': current_date,
+                        'start_date': warranty_start_date,
                         'end_date': end_date,
                     }
                     serial_id and warranty_vals.update({"serial_id": serial_id.id})
