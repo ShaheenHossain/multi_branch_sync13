@@ -61,7 +61,7 @@
                             </tr>
                             <tr>
                                 <td  colspan="1" style="text-align:left;padding: 2px;">
-                                    <b>Device Category: </b>&#160;&#160;<t if="o.hardware_type_id" t-esc="o.hardware_type_id.name"/>
+                                    <b>Device Category: </b>&#160;&#160;<t if="o.device_category_id" t-esc="o.device_category_id.name"/>
                                 </td>
                                 <td colspan="1" style="text-align:left;padding: 2px;">
                                     <b>Warranty Type: </b>&#160;&#160;<t t-if="o.warranty_type" t-esc="o.warranty_type"/>
