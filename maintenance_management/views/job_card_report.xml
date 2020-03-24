@@ -85,7 +85,7 @@
                             </tr>
                             <tr>
                                 <td colspan="1" style="text-align:left;padding: 2px;">
-                                    <b>Serial No: </b>&#160;&#160;<t t-if="o.serial_no" t-esc="o.serial_no"/>
+                                    <b>Serial No: </b>&#160;&#160;<t t-if="o.lot_id" t-esc="o.lot_id.name"/>
                                 </td>
                                 <td class="o_right_border" colspan="2" style="text-align:left;padding: 2px;">
                                     <b>Ref.No: </b>&#160;&#160;<t t-if="o.ref_no" t-esc="o.ref_no"/>
