@@ -46,17 +46,26 @@
                         <table class="border mb32" style="width:100%;">
                             <tr>
                                 <td class="border" colspan="6" style="text-align:center;background-color:#919191;padding: 2px;">
-                                    JOB ORDER
+                                    JOB ORDER /بطاقة عمل
                                 </td>
                             </tr>
                             <tr>
                                 <td colspan="1" style="text-align:left;padding: 2px;">
-                                    <b>Job Card No:</b>&#160;&#160;<t t-if="o.product_id" t-esc="o.product_id.name"/>
+                                    <b>Job Card No:</b>&#160;&#160;<t t-if="o.name" t-esc="o.name"/>
                                 </td>
                                 <td colspan="1" style="text-align:left;padding: 2px;">
                                 </td>
                                 <td class="o_right_border" colspan="1" style="text-align:left;padding: 2px;">
                                     <b>Job Card Date: </b>&#160;&#160;<t t-if="o.jobcard_date" t-esc="o.jobcard_date"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="1" style="text-align:left;padding: 2px;">
+                                </td>
+                                <td colspan="1" style="text-align:left;padding: 2px;">
+                                </td>
+                                <td class="o_right_border" colspan="1" style="text-align:left;padding: 2px;">
+                                    <b>Warranty End Date: </b>&#160;&#160;<t t-if="o.warranty_end_date" t-esc="o.warranty_end_date"/>
                                 </td>
                             </tr>
                             <tr>
@@ -98,7 +107,7 @@
                                 <td colspan="1" class="o_right_border" style="text-align:left;padding: 2px;">
                                     <p>
                                         <b>M:</b>&#160;&#160;<span t-field="o.duration_month"/>&#160;&#160;&#160;&#160;
-                                        <b>Y:</b> &#160;&#160;<span t-field="o.duration_month"/>
+                                        <b>Y:</b> &#160;&#160;<span t-field="o.duration_year"/>
                                     </p>
                                 </td>
                             </tr>
@@ -117,7 +126,11 @@
                             </tr>
                             <tr>
                                 <td class="o_right_border" colspan="3" style="text-align:left;padding: 2px;">
-                                    <b>Engineer Remarks: </b>&#160;&#160;
+                                    <b>Engineer Remarks: </b>  
+                                </td>
+                            </tr>
+                            <tr>
+                                 <td class="o_right_border" colspan="3" style="text-align:left;padding: 30px;">
                                 </td>
                             </tr>
                             <tr>
@@ -134,7 +147,7 @@
                                     <b>Complaints</b>
                                 </td>
                                 <td class="border" colspan="3" style="text-align:right;padding: 2px;">
-                                    <b>شكاوي</b>
+                                    <b>الشكوى </b>
                                 </td>
                             </tr>
                             <tr t-if="o.white_screen">
@@ -259,7 +272,7 @@
                                     </td>
                                 </tr>
                             </table>
-                            <div class="text-center">
+                            <div class="text-center mt32">
                                 <span t-field="o.company_id.reports_footer"/>
                             </div>
                         </div>
