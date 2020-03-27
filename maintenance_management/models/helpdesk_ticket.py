@@ -80,8 +80,10 @@ class HelpdeskTicket(models.Model):
     return_to_scrap_picking_id = fields.Many2one("stock.picking", "Return To Scrap Picking", copy=False)
     replacement_refund_invoice_id = fields.Many2one("account.move", "Replacement Refund Invoice", copy=False)
     replacement_invoice_id = fields.Many2one("account.move", "Replacement Invoice", copy=False)
-    warranty_id = fields.Many2one("warranty.detail", string="Warranty Card", copy=False, help="Related Warranty Card")
-    invoice_id = fields.Many2one("account.move", string="Invoice", copy=False, help="Related Invoice")
+    # warranty_id = fields.Many2one("warranty.detail", string="Warranty Card", copy=False, help="Related Warranty Card")
+    # invoice_id = fields.Many2one("account.move", string="Invoice", copy=False, help="Related Invoice")
+    warranty_attachment = fields.Binary("Warranty Card", help="Related Warranty Card")
+    invoice_attachment = fields.Binary("Invoice", help="Related Invoice")
     warranty_end_date = fields.Date("Warranty End Date", copy=False, help="Related Warranty End Date")
 
     #Customer Complaints

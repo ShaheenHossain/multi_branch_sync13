@@ -134,8 +134,10 @@
                                 <field name="warranty_end_date"/>
                                 <field name="warranty_approval_type" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty')]}"/>
                                 <field name="warranty_approval_manager_id" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', '!=', 'manager_approval')], 'required': [('warranty_approval_type', '=', 'manager_approval'), ('warranty_type', '=', 'free_service')]}" context="{'maintenance_manager': True}" domain="[('branch_ids', 'in', branch_id)]"/>
-                                <field name="warranty_id" domain="[('sale_id', '=', sale_order_id)]" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['warranty_card', 'warranty_card_and_invoice'])]}"/>
-                                <field name="invoice_id" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['invoice', 'warranty_card_and_invoice'])]}" context="{'jobcard_invoice_check': True, 'sale_order_id': sale_order_id}"/>
+                                <!-- <field name="warranty_id" domain="[('sale_id', '=', sale_order_id)]" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['warranty_card', 'warranty_card_and_invoice'])]}"/>
+                                <field name="invoice_id" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['invoice', 'warranty_card_and_invoice'])]}" context="{'jobcard_invoice_check': True, 'sale_order_id': sale_order_id}"/> -->
+                                <field name="warranty_attachment" domain="[('sale_id', '=', sale_order_id)]" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['warranty_card', 'warranty_card_and_invoice'])]}"/>
+                                <field name="invoice_attachment" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['invoice', 'warranty_card_and_invoice'])]}" context="{'jobcard_invoice_check': True, 'sale_order_id': sale_order_id}"/>
                                 <field name="warranty_document" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty')]}"/>
                             </group>
                             <group name="warranty_information_right">
