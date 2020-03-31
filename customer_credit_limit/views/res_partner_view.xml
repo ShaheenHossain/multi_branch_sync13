@@ -10,16 +10,20 @@
                 <field name="credit_limit" readonly="1" groups="sales_team.group_sale_salesman,account.group_account_manager"/>
             </group>
             <notebook position="inside">
-                <page name="other_information" string="Other Information">
+                <page name="other_information" attrs="{'invisible': [('customer_rank','>', 0)]}" string="Other Information">
+                    <field name="customer_rank" invisible="1"/>
+                    <group>
+                        <field name="is_distributor"/>
+                    </group>
                     <div class="oe_title">
                         <label for="name_on_board"/>
-                        <field name="name_on_board" required="1"/>
+                        <field name="name_on_board" attrs="{'required': [('is_distributor', '=', True)]}"/>
                     </div>
                     <group name="other_main">
                         <group name="other_cr" string="CR">
-                            <field name="cr_no" required="1"/>
-                            <field name="cr_issue_date"/>
-                            <field name="cr_expiry_date"/>
+                            <field name="cr_no" attrs="{'required': [('is_distributor', '=', True)]}"/>
+                            <field name="cr_issue_date" attrs="{'required': [('is_distributor', '=', True)]}"/>
+                            <field name="cr_expiry_date" attrs="{'required': [('is_distributor', '=', True)]}"/>
                         </group>
                         <group name="other_license" string="License">
                             <field name="license_no"/>
