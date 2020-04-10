@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template_custom_pos_branch_extended" inherit_id="point_of_sale.template" xml:space="preserve">
+
+    <!-- Add Branch in PosTicket -->
+    <t t-extend="OrderReceipt">
+        <t t-jquery="[t-if='receipt.company.contact_address']" t-operation="after">
+            <t t-if='widget.pos.pos_session.branch_id'>
+                <div>Branch:<t t-esc='widget.pos.pos_session.branch_id[1]'/></div>
+            </t>
+        </t>
+    </t>
+
+</templates>
