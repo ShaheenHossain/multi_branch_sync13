@@ -12,10 +12,10 @@
     'depends': ['maintenance_management'],
     'data': [
         "security/ir.model.access.csv",
+        "wizard/change_product_wizard_view.xml",
         "views/product_template_view.xml",
         "views/helpdesk_ticket_view.xml",
         "views/similar_product_view.xml",
-        "wizard/change_product_wizard_view.xml",
         "views/sale_order_view.xml"
     ],
     'demo': [],

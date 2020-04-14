@@ -19,6 +19,7 @@
         "security/ir.model.access.csv",
         "report/device_installation_report_template.xml",
         "report/device_installation_report.xml",
+        "wizard/installment_product_selection.xml",
         "views/product_template_view.xml",
         "views/sim_card_view.xml",
         "views/stock_location_view.xml",

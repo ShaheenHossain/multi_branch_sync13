@@ -117,4 +117,12 @@
         <field name="fold" eval="True"/>
         <field name="allow_delete" eval="False"/>
     </record>
+    <record id="sequence_helpdesk_ticket" model="ir.sequence">
+       <field name="name">Helpdesk Ticket</field>
+       <field name="code">helpdesk.ticket</field>
+       <field name="active">TRUE</field>
+       <field name="padding">0</field>
+       <field name="number_next">1</field>
+       <field name="number_increment">1</field>
+    </record>
 </odoo>

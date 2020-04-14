@@ -64,13 +64,31 @@ class SaleOrder(models.Model):
             order.installation_count = len(order.device_installation_ids.ids)
 
     def create_installment_schedule(self):
+        installation_id = []
         if not self.mapped("order_line").filtered(lambda line: line.product_id and line.product_id.product_tmpl_id.is_rmts_device):
             raise Warning(_("There is No RMTS Device Product in order line. You can not create device installation."))
-        action = self.env.ref('road_master.device_installation_action').read()[0]
-        form_view = [(self.env.ref('road_master.device_installation_form_view').id, 'form')]
-        action['views'] = form_view + [(state, view) for state, view in action['views'] if view != 'form']
-        action['context'] = {'default_sale_order_id': self.id}
-        return action
+        for order_line in self.order_line:
+            if self.device_installation_ids and order_line.id not in self.device_installation_ids.mapped('device_installation_line_ids').sale_line_id.ids:
+                installation_id.append(order_line) 
+        if not self.device_installation_ids:
+            installation_id = self.order_line
+        if installation_id:
+            ctx = {
+                'default_sale_order_id': self.id,
+                'default_sale_order_line_id': [(4, sale_id.id) for sale_id in installation_id],
+            }
+            return {
+                'name':_("Sale Order Line"),
+                'view_mode': 'form',
+                'view_id': self.env.ref('road_master.installation_product_selection_wizard_form').id,
+                'view_type': 'form',
+                'res_model': 'installation.product.selection',
+                'type': 'ir.actions.act_window',
+                'target': 'new',
+                'context': ctx
+                }
+        else:
+            raise Warning(_("You have already created installation schedule for this sale order"))
 
     def action_view_installment_schedules(self):
         device_installation_ids = self.mapped('device_installation_ids')
@@ -115,13 +133,10 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         for order in self:
             if not self._context.get("device_install_process", False):
-                if order.rmts_device_installation and not order.device_installation_ids:
-                    raise Warning(_("You can not confirm RMTS Installation order without creating installation schedule."))
-                else:
-                    for device_installation in order.device_installation_ids:
-                        if device_installation.state != "done":
-                            message="You can not confirm RMTS Installation order if installation schedule process is not Completed.Device Installation Record %s is not in done state." % device_installation.display_name
-                            raise Warning(_(message))
+                for device_installation in order.device_installation_ids:
+                    if device_installation.state != "done":
+                        message="You can not confirm RMTS Installation order if installation schedule process is not Completed.Device Installation Record %s is not in done state." % device_installation.display_name
+                        raise Warning(_(message))
         return super(SaleOrder, self).action_confirm()
 
     def _create_invoices(self, grouped=False, final=False):

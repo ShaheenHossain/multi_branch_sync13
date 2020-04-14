@@ -7,7 +7,7 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <button name="action_draft" position="after">
-                <button name="create_installment_schedule" type="object" string="Create Installation Schedule" class="btn-primary" attrs="{'invisible':['|', ('rmts_device_installation', '!=', True), ('state', 'not in', ['draft', 'sent'])]}"/>
+                <button name="create_installment_schedule" type="object" string="Create Installation Schedule" class="btn-primary" attrs="{'invisible':['|', ('rmts_device_installation', '!=', True), ('state', '!=', 'sale')]}"/>
             </button>
             <field name="partner_shipping_id" position="after">
                 <field name="rmts_device_installation" invisible="1"/>

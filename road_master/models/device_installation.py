@@ -27,7 +27,7 @@ class DeviceInstallation(models.Model):
                               ("done_installation", "Done Installation"),
                               ("done", "Done"),
                               ("cancelled", "Cancelled")],
-                             string="State", default="draft", copy=False, required=True)
+                             string="State", default="draft", copy=False, required=True, tracking=True)
     branch_id = fields.Many2one("res.branch", string='Branch', default=lambda self: self.env.user.branch_id)
     mobile_location_id = fields.Many2one("stock.location", string="Mobile Location", default=False, copy=False,
                                          ondelete="restrict", help="Mobile Location for given installation schedule.")
@@ -165,11 +165,13 @@ class DeviceInstallation(models.Model):
         device_installation_line_obj = self.env["device.installation.line"]
         defaults = super(DeviceInstallation, self).default_get(fields)
         sale_order = self._context.get("default_sale_order_id", False) and self.env["sale.order"].browse(self._context.get("default_sale_order_id")) or False
+        sale_order_line = self._context.get("default_order_line", False) and self.env["sale.order.line"].browse(self._context.get("default_order_line")) or False
         if sale_order:
             defaults['branch_id'] = sale_order.branch_id.id
             installation_lines_data = []
-            for line in sale_order.order_line:
+            for line in sale_order_line:
                 device_installation_line = sale_order.device_installation_ids.mapped("device_installation_line_ids").filtered(lambda dil: dil.sale_line_id == line)
+                move_id = sale_order.picking_ids.mapped("move_line_ids_without_package").filtered(lambda dil: dil.product_id.id == line.product_id.id)
                 remaining_qty = line.product_uom_qty or 0
                 if device_installation_line and device_installation_line.product_id == line.product_id and device_installation_line.quantity > 0 and line.product_uom_qty > 0:
                     remaining_qty = line.product_uom_qty - device_installation_line.quantity
@@ -182,6 +184,8 @@ class DeviceInstallation(models.Model):
                         "product_uom_id": line.product_uom.id,
                         "sale_line_id": line.id,
                     }
+                    if move_id and move_id.product_uom_qty > 0 or move_id.qty_done > 0:
+                        line_vals.update({'lot_id': move_id.lot_id.id or False})
                     line_vals and installation_lines_data.append((0, 0, line_vals))
             if installation_lines_data:
                 defaults["device_installation_line_ids"] = installation_lines_data
@@ -218,10 +222,15 @@ class DeviceInstallation(models.Model):
         return True
 
     def action_done_tests(self):
+        for line in self.device_installation_line_ids:
+            if not line.sim_card_id:
+                raise Warning(_("Add SIM Card for device %s in device installation : %s" % (line.product_id.display_name, self.name)))
         self.write({"state": "done_tests"})
         return True
 
     def action_installation_start(self):
+        for line in self.device_installation_line_ids:
+            line.is_installation = True
         self.write({"state": "installation_in_progress"})
         return True
 
@@ -229,6 +238,9 @@ class DeviceInstallation(models.Model):
         for record in self:
             if not record.installation_picture_ids:
                 raise Warning(_("""Installation Pictures are not uploaded in installation process %s. Please upload images of installed device.""" % record.display_name))
+            for line in record.device_installation_line_ids:
+                if not line.vehicle_plate_no:
+                    raise Warning(_("""Vehicle Plate No is not updated in installation process %s. Please update Vehicle Plate No of installed device.""" % line.product_id.display_name))
         self.write({"state": "done_installation"})
         return True
 
@@ -461,6 +473,9 @@ class DeviceInstallationLine(models.Model):
     product_id = fields.Many2one("product.product", string="Product", copy=False, help="Select Device For Installation")
     quantity = fields.Float("Quantity", help="Quantity to be installed.")
     unit_price = fields.Float("Unit Price")
+    lot_id = fields.Many2one("stock.production.lot", string="Serial No", help="Related Lot / Serial No.")
+    installation_picture = fields.Binary('Installation Picture')
+    is_installation = fields.Boolean("Is Installation", default=False)
     product_uom_id = fields.Many2one("uom.uom", copy=False, ondelete="restrict", string="Unit of Measure")
     sale_order_id = fields.Many2one("sale.order", string="Sale Order", copy=False, ondelete="restrict", help="Related Sale Order")
     sim_card_id = fields.Many2one("sim.card", string="Sim Card", copy=False, ondelete="restrict")

@@ -33,6 +33,47 @@
         </field>
     </record>
 
+    <record id="helpdesk_ticket_view_form_inherit_helpdesk" model="ir.ui.view">
+        <field name="name">Tickets</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="helpdesk_sale.helpdesk_ticket_view_form_inherit_helpdesk_invoicing"/>
+        <field name="arch" type="xml">
+            <field name="sale_order_id" position="after">
+                <field name="is_job_card" invisible="1"/>
+            </field>
+            <field name="sale_order_id" position="attributes">
+                <attribute name="attrs">{'invisible': [('is_job_card','=',True)]}</attribute>
+            </field>
+        </field>        
+    </record>
+
+    <record id="customer_complaints_form" model="ir.ui.view">
+        <field name="name">customer.complaints.form</field>
+        <field name="model">customer.complaints</field>
+        <field name="priority" eval="70"/>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="arabic_name"/>
+                <field name="is_other"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="customer_complaints_action_main_tree" model="ir.actions.act_window">
+        <field name="name">Tickets</field>
+        <field name="res_model">customer.complaints</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Complaints.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="customer_complaints_menu" name="Customer Complaints" action="customer_complaints_action_main_tree"
+        sequence="99" parent="helpdesk.helpdesk_menu_config" groups="maintenance_management.group_maintenance_technician"/>
+
     <record id="helpdesk_ticket_jobcard_inherit_form" model="ir.ui.view">
         <field name="name">helpdesk.ticket.jobcard.inherit.form</field>
         <field name="model">helpdesk.ticket</field>
@@ -59,7 +100,13 @@
                     <field name="invoice_count" widget="statinfo" string="Invoice"/>
                 </button>
             </div>
-
+            <field name="kanban_state" position="before">
+                <div class="oe_title">
+                    <h1>
+                        <field name="sequence" readonly="1"/>
+                    </h1>
+                </div>
+            </field>
             <field name="team_id" position="attributes">
                 <attribute name="context">{'jobcard_team_check': True, 'is_job_card': is_job_card}</attribute>
             </field>
@@ -107,6 +154,7 @@
             </field>
 
             <field name="description" position="after">
+                <field name="engineer_remarks" placeholder="Engineer Remarks"/>
                 <notebook attrs="{'invisible': [('is_job_card', '!=', True)]}">
                     <page name="job_card_information" string="Job Card Information">
                         <group name="job_Card_information_main" string="Job Card Information">
@@ -138,27 +186,26 @@
                                 <field name="invoice_id" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['invoice', 'warranty_card_and_invoice'])]}" context="{'jobcard_invoice_check': True, 'sale_order_id': sale_order_id}"/> -->
                                 <field name="warranty_attachment" domain="[('sale_id', '=', sale_order_id)]" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['warranty_card', 'warranty_card_and_invoice'])]}"/>
                                 <field name="invoice_attachment" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', 'not in', ['invoice', 'warranty_card_and_invoice'])]}" context="{'jobcard_invoice_check': True, 'sale_order_id': sale_order_id}"/>
-                                <field name="warranty_document" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty')]}"/>
+                                <field name="warranty_document" attrs="{'invisible': ['|', ('warranty_type', '=', 'out_of_warranty'), ('warranty_approval_type', '=', 'warranty_card_and_invoice')]}"/>
                             </group>
                             <group name="warranty_information_right">
-                                <field name="sale_order_id" attrs="{'required':[('is_job_card', '=', True), ('is_paper_based_jc', '!=', True), '|', '&amp;', ('warranty_type', '=', 'free_service'), ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '!=', True)]}"/>
-                                <field name="sale_order_line_id" domain="[('order_id', '=', sale_order_id)]" attrs="{'required':[('is_job_card', '=', True), ('is_paper_based_jc', '!=', True),  '|', '&amp;', ('warranty_type', '=', 'free_service'), ('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '!=', True)]}"/>
+                                <field name="sale_order_id" />
+                                <field name="sale_order_line_id" domain="[('order_id', '=', sale_order_id)]"/>
                                 <field name="can_be_repaired" attrs="{'invisible': ['|', ('warranty_type', '!=', 'out_of_warranty')]}"/>
                                 <field name="job_card_type" attrs="{'invisible': [('warranty_type', '=', 'out_of_warranty'), ('can_be_repaired', '=', False)]}"/>
                                 <field name="replacement_type" attrs="{'invisible':[('job_card_type', '!=', 'replace')], 'required':[('job_card_type', '=', 'replace')]}"/>
-                                <field name="replacement_product_id" attrs="{'invisible':[('job_card_type', '!=', 'replace')], 'required':[('job_card_type', '=', 'replace')]}"/>
+                                <field name="replacement_product_id" domain="[('is_spare_part_product', '=', False)]" attrs="{'invisible':[('job_card_type', '!=', 'replace')], 'required':[('job_card_type', '=', 'replace')]}"/>
                                 <field name="discount_product_id" domain="[('type', '=', 'service')]" attrs="{'invisible':['|',('job_card_type', '!=', 'replace'),('replacement_type', 'not in', ['higher_no_fees', 'higher_with_fees'])], 'required':[('job_card_type', '=', 'replace'),('replacement_type', 'in', ['higher_no_fees', 'higher_with_fees'])]}"/>
                             </group>
                         </group>
                     </page>
                     <page name="customer_comoplaints" string="Customer Complaints" attrs="{'invisible': [('job_card_type', '=', 'installation')]}">
                         <group name="customer_complaints" string="Customer Complaints">
-                            <field name="white_screen"/>
-                            <field name="touch_broken"/>
-                            <field name="no_voice"/>
-                            <field name="bluetooth_not_working"/>
-                            <field name="other"/>
-                            <field name="complaint_description" attrs="{'invisible':[('other','!=',True)], 'required':[('other','=',True)]}"/>
+                            <group>
+                                <field name="customer_complaints_id" required="1" widget="many2many_tags" />
+                            </group>
+                            <field name="is_other" invisible="1"/>
+                            <field name="complaint_description" attrs="{'invisible': [('is_other', '=', False)]}"/>
                         </group>
                     </page>
                     <page name="workorders" string="Work Order Lines" attrs="{'invisible': [('job_card_type', 'in', ['replace', 'installation'])]}">

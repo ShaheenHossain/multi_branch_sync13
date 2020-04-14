@@ -3,6 +3,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import Warning
 import logging
+import datetime
 _logger = logging.getLogger(__name__)
 
 
@@ -35,6 +36,7 @@ class HelpdeskTicket(models.Model):
         return team_id
 
     #Job Card Fields
+    sequence = fields.Char(string='Sequence', help="Sequence", default=lambda self: _('New'))
     is_job_card = fields.Boolean("Job Card", default=False, help="Is this helpdesk ticket a job card?")
     is_paper_based_jc = fields.Boolean("Paper Based Job Card", default=False, help="Check if paper based jobcard.")
     jobcard_file = fields.Binary("Job Card File", help="Job card document for paper based job card.")
@@ -85,14 +87,12 @@ class HelpdeskTicket(models.Model):
     warranty_attachment = fields.Binary("Warranty Card", help="Related Warranty Card")
     invoice_attachment = fields.Binary("Invoice", help="Related Invoice")
     warranty_end_date = fields.Date("Warranty End Date", copy=False, help="Related Warranty End Date")
+    engineer_remarks = fields.Text("Engineer Remarks")
 
     #Customer Complaints
-    white_screen = fields.Boolean("White Screen", default=False)
-    touch_broken = fields.Boolean("Touch Broken", default=False)
-    no_voice = fields.Boolean("No Voice", default=False)
-    bluetooth_not_working = fields.Boolean("Bluetooth Not Working", default=False)
-    other = fields.Boolean("Other", default=False)
     complaint_description = fields.Text("Complaint Description")
+    is_other = fields.Boolean("Other?", default=False)
+    customer_complaints_id = fields.Many2many('customer.complaints', "helpdesk_ticket_complaints_rel", string="Customer Complaints", help="Complaints for products." )
 
 
     #Work Order Details (Table Needed For Spareparts
@@ -114,6 +114,31 @@ class HelpdeskTicket(models.Model):
                                     help="Invoice count for this jobcard ticket.")
     order_count = fields.Integer("Order", compute="get_order_count", store=False,
                                  help="Sale Order Count for this jobcard ticket.")
+
+    def name_get(self):
+        result = []
+        for ticket in self:
+            if ticket.name and ticket.id:
+                result.append((ticket.id, "%s (#%d)" % (ticket.name, ticket.id)))
+        return result
+
+    @api.model
+    def create(self, vals):
+        if vals.get('sequence', 'New') == 'New' and self.env.user.branch_id.name:
+            vals['sequence'] = self.env.user.branch_id.name +'-'+str(datetime.datetime.now().strftime("%y"))+'-'+self.env['ir.sequence'].next_by_code('helpdesk.ticket') or 'New'
+        result = super(HelpdeskTicket, self).create(vals)
+        return result
+
+    @api.onchange("customer_complaints_id")
+    def onchange_customer_complaints(self):
+        records = []
+        for rec in self.customer_complaints_id:
+            if rec.is_other:
+                records.append(rec)
+        if records:
+            self.is_other = True
+        else:
+            self.is_other = False
 
     def get_order_count(self):
         sale_order_obj = self.env["sale.order"]
@@ -384,20 +409,26 @@ class HelpdeskTicket(models.Model):
     def create_return_picking(self):
         stock_picking_obj = self.env["stock.picking"]
         stock_return_picking_obj = self.env["stock.return.picking"]
+        sale_order_id = False
         for ticket in self:
+            if not ticket.sale_order_id:
+                stock_picking_id = self.env["stock.picking"].search([('move_line_ids_without_package.lot_id', '=', ticket.lot_id.id)])
+                sale_order_id = self.env["sale.order"].search([('picking_ids.id', 'in', stock_picking_id.ids)], order='id desc', limit=1)
+            else:
+                sale_order_id = ticket.sale_order_id
             try:
                 if ticket.replacement_return_picking_id:
                     continue
-                if not ticket.sale_order_id.picking_ids.filtered(lambda picking: picking.state == 'done'):
-                    raise Warning(_("No transferred deliveries in sale order %s to return." % ticket.sale_order_id.name))
+                if sale_order_id and not sale_order_id.picking_ids.filtered(lambda picking: picking.state == 'done'):
+                    raise Warning(_("No transferred deliveries in sale order %s to return." % sale_order_id.name))
 
                 if not ticket.warehouse_id.wh_scrap_location_id.id:
                     raise Warning(_("Configure scrap location in warehouse %s" % ticket.warehouse_id.display_name))
 
-                pickings = ticket.sale_order_id.picking_ids.filtered(lambda picking: picking.state == 'done' and picking.mapped("move_lines").mapped("product_id") in ticket.product_id)
+                pickings = sale_order_id.picking_ids.filtered(lambda picking: picking.state == 'done' and picking.mapped("move_lines").mapped("product_id") in ticket.product_id)
                 pickings_to_return = pickings and pickings[0] or False
                 if not pickings_to_return:
-                    raise Warning(_("No Transferred Picking in order : %s. Can not generate return picking." % ticket.sale_order_id.name))
+                    raise Warning(_("No Transferred Picking in order : %s. Can not generate return picking." % sale_order_id.name))
 
                 return_picking_data = {"picking_id": pickings_to_return.id}
                 temp_picking = stock_return_picking_obj.new(return_picking_data)
@@ -429,16 +460,22 @@ class HelpdeskTicket(models.Model):
     def create_refund_invoice(self):
         account_move_reversal_obj = self.env["account.move.reversal"]
         account_move_obj = self.env["account.move"]
+        sale_order_id = False
         for ticket in self:
+            if not ticket.sale_order_id:
+                stock_picking_id = self.env["stock.picking"].search([('move_line_ids_without_package.lot_id', '=', ticket.lot_id.id)])
+                sale_order_id = self.env["sale.order"].search([('picking_ids.id', 'in', stock_picking_id.ids)], order='id desc', limit=1)
+            else:
+                sale_order_id = ticket.sale_order_id
             if ticket.replacement_refund_invoice_id:
                 continue
-            if not ticket.sale_order_id.invoice_ids.filtered(lambda invoice: invoice.state == 'posted' and invoice.amount_residual < invoice.amount_total):
-                raise Warning(_("No paid invoices in sale order %s to refund." % ticket.sale_order_id.name))
+            if sale_order_id and not sale_order_id.invoice_ids.filtered(lambda invoice: invoice.state == 'posted' and invoice.amount_residual < invoice.amount_total):
+                raise Warning(_("No paid invoices in sale order %s to refund." % sale_order_id.name))
 
-            invoices = ticket.sale_order_id.invoice_ids.filtered(lambda invoice: invoice.state == 'posted' and invoice.amount_residual < invoice.amount_total)
+            invoices = sale_order_id.invoice_ids.filtered(lambda invoice: invoice.state == 'posted' and invoice.amount_residual < invoice.amount_total)
             invoice_to_refund = invoices and invoices[0] or False
             if not invoice_to_refund:
-                raise Warning(_("No paid invoices in sale order %s to refund." % ticket.sale_order_id.name))
+                raise Warning(_("No paid invoices in sale order %s to refund." % sale_order_id.name))
 
             ctx = {'active_id': invoice_to_refund.id, 'active_ids': invoice_to_refund.ids, 'active_model': 'account.move'}
             refund_invoice_fields = account_move_reversal_obj.fields_get()
@@ -513,19 +550,25 @@ class HelpdeskTicket(models.Model):
 
     def crate_replacement_invoice(self):
         invoice_obj = self.env["account.move"]
+        sale_order_id = False
         for ticket in self:
+            if not ticket.sale_order_id:
+                stock_picking_id = self.env["stock.picking"].search([('move_line_ids_without_package.lot_id', '=', ticket.lot_id.id)])
+                sale_order_id = self.env["sale.order"].search([('picking_ids.id', 'in', stock_picking_id.ids)], order='id desc', limit=1)
+            else:
+                sale_order_id = ticket.sale_order_id
 
             if ticket.replacement_invoice_id:
                 continue
 
-            invoice_vals = ticket.sale_order_id._prepare_invoice()
+            invoice_vals = sale_order_id._prepare_invoice()
             invoice_line_vals = []
 
             #Invoice line
-            sale_lines = ticket.sale_order_id.order_line.filtered(lambda line: line.product_id == ticket.product_id)
+            sale_lines = sale_order_id.order_line.filtered(lambda line: line.product_id == ticket.product_id)
             sale_order_line = sale_lines and sale_lines[0] or False
             if not sale_order_line:
-                raise Warning(_("No Line with product %s in sale order %s" % (ticket.product_id.displat_name, ticket.sale_order_id.name)))
+                raise Warning(_("No Line with product %s in sale order %s" % (ticket.product_id.displat_name, sale_order_id.name)))
             invoice_line_data = sale_order_line._prepare_invoice_line()
             new_product_price_unit = self.replacement_product_id.uom_id._compute_price(self.replacement_product_id.lst_price, self.replacement_product_id.uom_id)
             invoice_line_data.update({
@@ -544,10 +587,10 @@ class HelpdeskTicket(models.Model):
                 price_unit = 0.0
                 if new_product_price_unit > old_product_price_unit:
                     price_unit = new_product_price_unit - old_product_price_unit
-                sale_disc_lines = ticket.sale_order_id.order_line.filtered(lambda line: line.product_id == ticket.product_id)
+                sale_disc_lines = sale_order_id.order_line.filtered(lambda line: line.product_id == ticket.product_id)
                 sale_order_line = sale_disc_lines and sale_disc_lines[0] or False
                 if not sale_disc_lines:
-                    raise Warning(_("No Line with product %s in sale order %s" % (ticket.product_id.displat_name, ticket.sale_order_id.name)))
+                    raise Warning(_("No Line with product %s in sale order %s" % (ticket.product_id.displat_name, sale_order_id.name)))
                 invoice_line_data = sale_order_line._prepare_invoice_line()
                 invoice_line_data.update({
                     'product_id': ticket.discount_product_id.id,
@@ -571,15 +614,15 @@ class HelpdeskTicket(models.Model):
             new_invoice = invoice_obj.create(invoice_vals)
 
             if ticket.job_card_type == "replace" and ticket.replacement_type == "higher_with_fees":
-                invoice_vals = ticket.sale_order_id._prepare_invoice()
+                invoice_vals = sale_order_id._prepare_invoice()
                 if new_product_price_unit > old_product_price_unit:
                     price_unit = new_product_price_unit - old_product_price_unit
 
                 # Invoice line
-                new_sale_lines = ticket.sale_order_id.order_line.filtered(lambda line: line.product_id == ticket.product_id)
+                new_sale_lines = sale_order_id.order_line.filtered(lambda line: line.product_id == ticket.product_id)
                 sale_order_line = new_sale_lines and new_sale_lines[0] or False
                 if not sale_order_line:
-                    raise Warning(_("No Line with product %s in sale order %s" % (ticket.product_id.displat_name, ticket.sale_order_id.name)))
+                    raise Warning(_("No Line with product %s in sale order %s" % (ticket.product_id.displat_name, sale_order_id.name)))
                 invoice_line_data = sale_order_line._prepare_invoice_line()
                 invoice_line_data.update({
                     'product_id': ticket.replacement_product_id.id,
@@ -701,3 +744,22 @@ class HelpdeskWorkorder(models.Model):
             self.price_unit = self.product_id.uom_id._compute_price(self.product_id.lst_price, self.product_id.uom_id)
             if not self.quantity or self.quantity < 0:
                 self.quantity = 1
+
+
+class CustomerComplaints(models.Model):
+    _name = "customer.complaints"
+    _description = "Customer Complaints"
+
+
+    name = fields.Char("Name", required=True)
+    arabic_name = fields.Char("Arabic")
+    is_other = fields.Boolean("Other?", default=False)
+
+
+    def name_get(self):
+        result = []
+        for rec in self:
+            if rec.name and rec.arabic_name:
+                name = rec.name + ' ' + rec.arabic_name
+                result.append((rec.id, name))
+        return result

@@ -16,6 +16,7 @@
         "security/ir_rule.xml",
         "security/ir.model.access.csv",
         "wizard/request_stock_wizard_view.xml",
+        "wizard/request_job_card_wizard_view.xml",
         "views/helpdesk_stage_view.xml",
         "views/sale_order_view.xml",
         "views/helpdesk_ticket_view.xml",

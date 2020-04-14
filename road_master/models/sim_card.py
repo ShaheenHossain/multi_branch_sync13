@@ -7,8 +7,9 @@ class SimCard(models.Model):
     _name = "sim.card"
     _description = "Sim Card"
     _order = "id desc"
+    _rec_name = 'serial_no'
 
-    name = fields.Char("Name", copy=False, required=1)
+    # name = fields.Char("Name", copy=False, required=1)
     serial_no = fields.Char("Serial No.", copy=False, required=1)
     activation_date = fields.Date("Activation Date")
     mobile_no = fields.Char("Mobile No.", copy=False)

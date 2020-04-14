@@ -130,11 +130,8 @@
                                 </td>
                             </tr>
                             <tr>
-                                 <td class="o_right_border" colspan="3" style="text-align:left;padding: 30px;">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="o_right_border" colspan="6" style="text-align:left;padding: 2px;">
+                                 <td class="o_right_border" colspan="3" style="text-align:left;padding: 10px;">
+                                    <t t-if="o.engineer_remarks" t-esc="o.engineer_remarks"/>
                                 </td>
                             </tr>
                         </table>
@@ -150,47 +147,17 @@
                                     <b>الشكوى </b>
                                 </td>
                             </tr>
-                            <tr t-if="o.white_screen">
-                                <td class="o_right_border" colspan="3" style="text-align:left;padding: 2px;">
-                                    <b>White Screen</b>
-                                </td>
-                                <td class="o_right_border" colspan="3" style="text-align:right;padding: 2px;">
-                                    <b>شاشة بيضاء</b>
-                                </td>
+                            <tr t-if="o.customer_complaints_id">
+                                <t t-foreach="o.customer_complaints_id" t-as="complaint">
+                                    <td if="complaint.name" class="o_right_border" colspan="3" style="text-align:left;padding: 2px;">
+                                        <b><t t-esc="complaint.name" /></b>
+                                    </td>
+                                    <td if="complaint.arabic_name" class="o_right_border" colspan="3" style="text-align:right;padding: 2px;">
+                                        <b><t t-esc="complaint.arabic_name" /></b>
+                                    </td>
+                                </t>
                             </tr>
-                            <tr t-if="o.touch_broken">
-                                <td class="o_right_border" colspan="3" style="text-align:left;padding: 2px;">
-                                    <b>Touch Broken</b>
-                                </td>
-                                <td class="o_right_border" colspan="3" style="text-align:right;padding: 2px;">
-                                    <b>اللمس مكسور</b>
-                                </td>
-                            </tr>
-                            <tr t-if="o.no_voice">
-                                <td class="o_right_border" colspan="3" style="text-align:left;padding: 2px;">
-                                    <b>No Voice</b>
-                                </td>
-                                <td class="o_right_border" colspan="3" style="text-align:right;padding: 2px;">
-                                    <b>مافي صوت</b>
-                                </td>
-                            </tr>
-                            <tr t-if="o.bluetooth_not_working">
-                                <td class="o_right_border" colspan="3" style="text-align:left;padding: 2px;">
-                                    <b>Bluetooth Not Working</b>
-                                </td>
-                                <td class="o_right_border" colspan="3" style="text-align:right;padding: 2px;">
-                                    <b>البلوتوث لا يعمل</b>
-                                </td>
-                            </tr>
-                            <tr t-if="o.other">
-                                <td class="o_right_border" colspan="3" style="text-align:left;padding: 2px;">
-                                    <b>Other</b>
-                                </td>
-                                <td class="o_right_border" colspan="3" style="text-align:right;padding: 2px;">
-                                    <b>آخر</b>
-                                </td>
-                            </tr>
-                            <tr t-if="o.other">
+                            <tr t-if="o.is_other and o.complaint_description">
                                 <td class="border" colspan="6" style="text-align:left;padding: 2px;">
                                     <t t-esc="o.complaint_description"/>
                                 </td>

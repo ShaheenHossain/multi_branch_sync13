@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Request Stock Wizard Form -->
+    <record id="installation_product_selection_wizard_form" model="ir.ui.view">
+        <field name="name">installation.product.selection.wizard.form</field>
+        <field name="model">installation.product.selection</field>
+        <field name="arch" type="xml">
+            <form string="Sale Order Details">
+                <field name="sale_order_line_id"/>
+                <footer>
+                    <button name="create_installment" string="Create Installation Schedule" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

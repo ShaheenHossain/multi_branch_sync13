@@ -12,6 +12,7 @@
                 <field name="product_uom_id" groups="uom.group_uom"/>
                 <field name="unit_price"/>
                 <field name="sub_total"/>
+                <field name="installation_picture"/>
             </tree>
         </field>
     </record>
@@ -43,6 +44,7 @@
                             <field name="invoice_id"/>
                             <field name="sale_line_id" readonly="1"/>
                             <field name="subscription_id" readonly="1" force_save="1"/>
+                            <field name="installation_picture"/>
                         </group>
                     </group>
                     <group string="Transfers">
@@ -80,7 +82,7 @@
                     <button name="open_signature_url" string="Get Signature" type="object" class="btn-primary" states="done_installation" groups="road_master.group_rmts_technician"/>
                     <button name="send_signature_url" string="Send Mail" type="object" class="btn-primary" states="done_installation" groups="road_master.group_rmts_technician"/>
                     <button name="action_cancel" string="Cancel" type="object" class="btn-primary" states="draft,confirmed" groups="road_master.group_rmts_technician"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done"/>
+                    <field name="state" widget="statusbar"  statusbar_visible="draft,confirmed,received,done_tests,installation_in_progress,done_installation,done"/> 
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -123,13 +125,16 @@
                             <group string="Installation Lines">
                                 <field name="device_installation_line_ids" nolabel="1">
                                     <tree editable="top" create="0">
-                                        <field name="vehicle_plate_no"/>
+                                        <field name="vehicle_plate_no"  attrs="{'readonly': [('is_installation', '=', False)], 'required': [('is_installation', '=', True)]}" context="{'rmts_technician':True}"/>
+                                        <field name="is_installation" invisible="1"/>
                                         <field name="product_id"/>
                                         <field name="sim_card_id"/>
+                                        <field name="lot_id"/>
                                         <field name="quantity"/>
                                         <field name="product_uom_id" groups="uom.group_uom"/>
                                         <field name="unit_price"/>
                                         <field name="sub_total"/>
+                                        <field name="installation_picture"/>
                                     </tree>
                                     <form string="Device Installation Line">
                                         <sheet>

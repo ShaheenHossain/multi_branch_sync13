@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Request Stock Wizard Form -->
+    <record id="request_job_card_data_wizard_form" model="ir.ui.view">
+        <field name="name">request.job.card.data.wizard.form</field>
+        <field name="model">request.job.card.data.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Sale Order Details">
+                <group>
+                    <group>
+                        <field name="lot_id" invisible="1"/>
+                        <field name="serial_no"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="get_job_card_data" string="Search" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="request_job_card_show_wizard_form" model="ir.ui.view">
+        <field name="name">request.job.card.data.wizard.form</field>
+        <field name="model">request.job.card.data.wizard</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" string="Request Job Card Data From Serial No">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="serial_no" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="warehouse_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook colspan="4">
+                        <page string="Sale Order Detail">
+                            <field name="sale_order_id" readonly="1"/>
+                        </page>
+                        <page string="Warranty Detail">
+                            <field name="warranty_id" readonly="1"/>
+                        </page>
+                        <page string="Job Card Detail">
+                            <field name="job_card_id" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action Request Stock -->
+    <record id="action_request_job_card_data_wizard" model="ir.actions.act_window">
+        <field name="name">Sale Order Details</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">request.job.card.data.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="request_job_card_data_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="jobcard_data_menu" name="Get Job Card Data" action="action_request_job_card_data_wizard"
+        sequence="99" parent="helpdesk.helpdesk_ticket_menu_main" groups="maintenance_management.group_maintenance_technician"/>
+
+</odoo>

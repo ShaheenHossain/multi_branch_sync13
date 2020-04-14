@@ -5,7 +5,7 @@
         <field name="model">sim.card</field>
         <field name="arch" type="xml">
             <tree string="Sim Cards">
-                <field name="name"/>
+                <!-- <field name="name"/> -->
                 <field name="serial_no"/>
                 <field name="partner_id"/>
                 <field name="mobile_no"/>
@@ -25,25 +25,26 @@
                 </header>
                 <sheet>
                     <div class="oe_title">
-                        <label for="name"/>
+                        <label for="serial_no"/>
                         <h2>
-                            <field name="name"/>
+                            <!-- <field name="name"/> -->
+                            <field name="serial_no"/>
                         </h2>
-                        <label for="branch_id"/>
+                        <!-- <label for="branch_id"/>
                         <h4>
                             <field name="branch_id"/>
-                        </h4>
+                        </h4> -->
                     </div>
                     <group>
                         <group>
-                            <field name="serial_no"/>
-                            <field name="mobile_no"/>
+                            <field name="partner_id"/>
                             <field name="associated_plate_no"/>
+                            <field name="activation_date"/>
                         </group>
                         <group>
-                            <field name="activation_date"/>
-                            <field name="partner_id"/>
+                            <field name="mobile_no"/>
                             <field name="associated_contract_id"/>
+                            <field name="branch_id"/>
                         </group>
                     </group>
                 </sheet>
@@ -56,7 +57,8 @@
         <field name="model">sim.card</field>
         <field name="arch" type="xml">
             <search string="Sim Cards">
-                <field name="name" string="SIM" filter_domain="['|', ('name', 'ilike', self),('serial_no', 'ilike', self)]"/>
+                <!-- <field name="name" string="SIM" filter_domain="['|', ('name', 'ilike', self),('serial_no', 'ilike', self)]"/> -->
+                <field name="serial_no" string="SIM" filter_domain="[('serial_no', 'ilike', self)]"/>
                 <separator/>
                 <filter string="Active" name="filter_is_active" domain="[('state','=','active')]"/>
                 <filter string="Inactive" name="filter_is_inactive" domain="[('state', '=', 'inactive')]"/>
