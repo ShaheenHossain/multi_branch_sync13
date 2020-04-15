@@ -171,7 +171,7 @@ class DeviceInstallation(models.Model):
             installation_lines_data = []
             for line in sale_order_line:
                 device_installation_line = sale_order.device_installation_ids.mapped("device_installation_line_ids").filtered(lambda dil: dil.sale_line_id == line)
-                move_id = sale_order.picking_ids.mapped("move_line_ids_without_package").filtered(lambda dil: dil.product_id.id == line.product_id.id)
+                move_id = sale_order.picking_ids.mapped("move_line_ids_without_package").filtered(lambda dil: dil.product_id.id == line.product_id.id).sorted(key=lambda r: r.id, reverse=True)
                 remaining_qty = line.product_uom_qty or 0
                 if device_installation_line and device_installation_line.product_id == line.product_id and device_installation_line.quantity > 0 and line.product_uom_qty > 0:
                     remaining_qty = line.product_uom_qty - device_installation_line.quantity
@@ -184,7 +184,7 @@ class DeviceInstallation(models.Model):
                         "product_uom_id": line.product_uom.id,
                         "sale_line_id": line.id,
                     }
-                    if move_id and move_id.product_uom_qty > 0 or move_id.qty_done > 0:
+                    if move_id and move_id[0].product_uom_qty > 0 or move_id[0].qty_done > 0:
                         line_vals.update({'lot_id': move_id.lot_id.id or False})
                     line_vals and installation_lines_data.append((0, 0, line_vals))
             if installation_lines_data:

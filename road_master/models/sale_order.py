@@ -85,7 +85,7 @@ class SaleOrder(models.Model):
                 'res_model': 'installation.product.selection',
                 'type': 'ir.actions.act_window',
                 'target': 'new',
-                'context': ctx
+                'context': ctx,
                 }
         else:
             raise Warning(_("You have already created installation schedule for this sale order"))
