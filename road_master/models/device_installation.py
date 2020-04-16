@@ -185,7 +185,7 @@ class DeviceInstallation(models.Model):
                         "sale_line_id": line.id,
                     }
                     if move_id and move_id[0].product_uom_qty > 0 or move_id[0].qty_done > 0:
-                        line_vals.update({'lot_id': move_id.lot_id.id or False})
+                        line_vals.update({'lot_id': move_id[0].lot_id.id or False})
                     line_vals and installation_lines_data.append((0, 0, line_vals))
             if installation_lines_data:
                 defaults["device_installation_line_ids"] = installation_lines_data
